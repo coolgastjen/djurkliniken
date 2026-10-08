@@ -33,11 +33,16 @@ const Treat = {
   },
 
   enter(arg) {
-    this.isWild = arg === 'wild';
-    this.a = this.isWild ? Game.s.wild : Game.get(arg);
+    this.kind = arg === 'wild' ? 'wild' : arg === 'akut' ? 'akut' : 'own';
+    this.isWild = this.kind !== 'own';
+    this.a = this.kind === 'wild' ? Game.s.wild : this.kind === 'akut' ? Game.s.akut : Game.get(arg);
+    this.sew = null;
+    $('#sew-layer').innerHTML = '';
     if (!this.a || !this.a.injury || this.a.dead) { setTimeout(() => show('home'), 0); return; }
     const sp = SPECIES[this.a.species];
-    $('#treat-title').textContent = this.isWild ? `Vild patient: ${sp.name.toLowerCase()}` : `${this.a.name} hos veterinären`;
+    $('#treat-title').textContent = this.kind === 'akut' ? `Akut: ${sp.name.toLowerCase()}` : this.isWild ? `Vild patient: ${sp.name.toLowerCase()}` : `${this.a.name} hos veterinären`;
+    $('#treat-timer').classList.toggle('hidden', this.kind !== 'akut');
+    this.updateTimer();
     this.finished = false;
     this.wrong = 0;
     this.setTool(null);
@@ -46,7 +51,51 @@ const Treat = {
     requestAnimationFrame(() => this.placeRing());
   },
 
+  updateTimer() {
+    if (this.kind !== 'akut' || !this.a) return;
+    const t = Math.max(0, Math.ceil(this.a.timeLeft || 0));
+    const el = $('#treat-timer');
+    el.textContent = `Tid kvar ${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+    el.classList.toggle('low', t <= 20);
+  },
+
+  clearPatient() {
+    if (this.kind === 'akut') Game.s.akut = null;
+    else Game.s.wild = null;
+  },
+
+  // Minispel: sy ihop såret genom att trycka på prickarna i ordning
+  startSew() {
+    const t = this.target();
+    const st = $('#treat-stage').getBoundingClientRect();
+    this.sew = { next: 0, pts: [] };
+    let html = '<svg class="sew-lines"><polyline id="sew-line" points=""/></svg>';
+    for (let i = 0; i < 5; i++) {
+      const x = t.x - st.left + (i - 2) * t.r * 0.42;
+      const y = t.y - st.top + (i % 2 ? -1 : 1) * t.r * 0.3;
+      html += `<button class="sew-dot" data-i="${i}" style="left:${x}px;top:${y}px">${i + 1}</button>`;
+    }
+    $('#sew-layer').innerHTML = html;
+    $('#target-ring').classList.add('hidden');
+    $$('#sew-layer .sew-dot').forEach(d => d.addEventListener('pointerdown', e => { e.stopPropagation(); this.sewTap(+d.dataset.i, d); }));
+  },
+
+  sewTap(i, dot) {
+    if (!this.sew) return;
+    if (i !== this.sew.next) { Sound.bad(); this.setMsg(`Börja med nummer ${this.sew.next + 1}!`, 'bad'); return; }
+    Sound.tone(500 + i * 90, 0.1, 'triangle', 0.1);
+    dot.classList.add('done');
+    this.sew.pts.push(`${parseFloat(dot.style.left)},${parseFloat(dot.style.top)}`);
+    $('#sew-line').setAttribute('points', this.sew.pts.join(' '));
+    this.sew.next++;
+    if (this.sew.next >= 5) {
+      setTimeout(() => { $('#sew-layer').innerHTML = ''; this.sew = null; this.completeStep(); }, 350);
+    }
+  },
+
   leave() {
+    this.sew = null;
+    $('#sew-layer').innerHTML = '';
     this.stopHold();
     this.down = false;
     this.setTool(null);
@@ -94,6 +143,7 @@ const Treat = {
       this.setTool(id);
       this.setMsg(`Bra val! ${ACTION_TEXT[step.action]}`, 'action');
       this.placeRing();
+      if (step.action === 'sew') this.startSew();
     } else {
       Sound.bad();
       this.setTool(null);
@@ -137,7 +187,7 @@ const Treat = {
   // ---------- Pekare / finger ----------
 
   onDown(e) {
-    if (this.finished || !this.a || !this.a.injury) return;
+    if (this.finished || !this.a || !this.a.injury || this.sew) return;
     this.moveCursor(e);
     const t = this.target();
     const p = { x: e.clientX, y: e.clientY };
@@ -153,6 +203,7 @@ const Treat = {
     $('#treat-stage').setPointerCapture(e.pointerId);
     this.down = true;
     this.last = p;
+    this.lastT = performance.now();
     this.prog = 0;
     const step = this.step();
     if (step.action === 'click') { this.completeStep(); return; }
@@ -181,6 +232,21 @@ const Treat = {
       this.last = p;
     } else if (step.action === 'pull') {
       this.prog = Math.min(1, dist(p, t) / (t.r * 2.6));
+    } else if (step.action === 'slowpull') {
+      const now = performance.now();
+      const speed = dist(p, this.last) / Math.max(1, now - this.lastT);
+      this.last = p;
+      this.lastT = now;
+      if (speed > 1.1 && this.prog > 0.05) {
+        this.down = false;
+        this.prog = 0;
+        this.updateProgress();
+        $('#target-ring').classList.remove('busy');
+        Sound.bad();
+        this.setMsg('Oj, för fort! Den gled tillbaka. Dra långsamt!', 'bad');
+        return;
+      }
+      this.prog = Math.min(1, dist(p, t) / (t.r * 2.2));
     } else if (step.action === 'hold') {
       this.holdInside = dist(p, t) < t.r * 1.4;
     }
@@ -197,7 +263,7 @@ const Treat = {
     this.down = false;
     this.stopHold();
     $('#target-ring').classList.remove('busy');
-    if (this.step().action === 'pull' && this.prog < 1) {
+    if (['pull', 'slowpull'].includes(this.step().action) && this.prog < 1) {
       this.prog = 0;
       this.updateProgress();
       this.setMsg('Det sitter fast! Håll kvar och dra längre bort.', 'action');
@@ -260,9 +326,10 @@ const Treat = {
     this.render();
     $('#treat-problem').textContent = `${a.name} mår bra igen!`;
     this.setMsg('Bra jobbat, doktorn!', 'good');
-    const reward = this.isWild ? 20 : 15;
+    const reward = this.kind === 'akut' ? 40 + Math.floor((a.timeLeft || 0) / 5) : this.isWild ? 20 : 15;
+    if (this.kind === 'akut') { a.saved = true; $('#treat-timer').classList.add('hidden'); }
     Game.addCoins(reward);
-    Game.s.stars++;
+    Game.s.stars += this.kind === 'akut' ? 2 : 1;
     Game.s.healed++;
     updateHud();
     Game.save();
@@ -273,7 +340,7 @@ const Treat = {
 
   celebrate(reward, def) {
     const a = this.a;
-    const rewards = `<div class="reward"><span class="pill">${uiIcon('coin')} +${reward}</span><span class="pill">${uiIcon('star')} +1</span></div>`;
+    const rewards = `<div class="reward"><span class="pill">${uiIcon('coin')} +${reward}</span><span class="pill">${uiIcon('star')} +${this.kind === 'akut' ? 2 : 1}</span></div>`;
     const markText = def.mark ? `<p>${def.mark === 'plaster' ? 'Plåstret' : 'Bandaget'} får sitta kvar en liten stund.</p>` : '';
     if (!this.isWild) {
       openModal(`<div class="celebrate"><div class="portrait">${drawAnimal(a, { mood: 'joy' })}</div>
@@ -284,7 +351,7 @@ const Treat = {
     }
     const free = Game.freeSlots() > 0;
     openModal(`<div class="celebrate"><div class="portrait">${drawAnimal(a, { mood: 'joy' })}</div>
-      <h2>Hurra! ${esc(a.name)} mår bra igen!</h2>${rewards}
+      <h2>${this.kind === 'akut' ? `Du räddade ${esc(a.name)} i tid!` : `Hurra! ${esc(a.name)} mår bra igen!`}</h2>${rewards}
       <p>Vill du släppa ut den i naturen igen, eller ska den få bo hos dig?</p>
       <div class="modal-footer"><button class="btn blue" id="cel-free">Släpp fri (+10 mynt)</button></div>
       ${free ? `<p class="label" style="margin-top:12px">Eller ge den ett namn och adoptera den:</p>
@@ -294,7 +361,7 @@ const Treat = {
       </div>`, true);
     $('#cel-free').onclick = () => {
       Game.addCoins(10);
-      Game.s.wild = null;
+      this.clearPatient();
       Game.save();
       Sound.coin();
       toast(`Hej då! ${a.name} springer glad tillbaka ut i naturen.`, 'good');
@@ -308,7 +375,7 @@ const Treat = {
         const n = Game.makeAnimal(a.species, a.color, name);
         n.mark = a.mark;
         Game.s.animals.push(n);
-        Game.s.wild = null;
+        this.clearPatient();
         Game.save();
         Sound.win();
         toast(`Välkommen hem, ${name}!`, 'good');

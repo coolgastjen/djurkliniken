@@ -24,6 +24,10 @@ const TOOLS = {
   tandborste: 'Tandborste',
   orondroppar: 'Örondroppar',
   kylpase: 'Kylpåse',
+  nal: 'Nål och tråd',
+  spruta: 'Spruta',
+  narkos: 'Narkosmask',
+  grip: 'Griptång',
 };
 
 const ACTION_TEXT = {
@@ -31,6 +35,8 @@ const ACTION_TEXT = {
   rub: 'Gnugga fram och tillbaka på rätt ställe!',
   hold: 'Håll kvar verktyget på rätt ställe!',
   pull: 'Tryck på rätt ställe och dra bort det!',
+  slowpull: 'Tryck på rätt ställe och dra ut det LÅNGSAMT!',
+  sew: 'Tryck på prickarna i rätt ordning: 1, 2, 3...',
 };
 
 const SPOT_NAMES = {
@@ -306,6 +312,63 @@ const INJURIES = {
     },
   },
 
+  // ---------- Akutfall (kommer med ambulans) ----------
+  djuptsar: {
+    name: 'Djupt sår', species: 'all', spots: ['legL', 'legR', 'body', 'head'], emergency: true,
+    problem: n => `${n} har ett djupt sår som blöder. Det måste sys ihop!`,
+    event: n => `Akut! ${n} har skurit sig på något vasst.`,
+    steps: [
+      { tool: 'tvatt', action: 'rub', hint: 'Först måste såret tvättas rent.', done: 'Såret är rent.' },
+      { tool: 'desinfektion', action: 'click', hint: 'Döda bakterierna så att såret inte blir infekterat.', done: 'Nu är det rent från bakterier.' },
+      { tool: 'nal', action: 'sew', hint: 'Ett djupt sår måste sys ihop.', done: 'Snyggt sytt!' },
+      { tool: 'bandage', action: 'rub', hint: 'Skydda stygnen.', done: 'Bandaget sitter!' },
+    ],
+    mark: 'bandage', markTime: 240,
+    draw: (x, y, step) => {
+      const gash = col => `<path d="M-16 -6 Q0 2 16 -4" stroke="${col}" stroke-width="5" stroke-linecap="round" fill="none"/>`;
+      if (step === 0) return at(x, y, swelling(16) + gash('#b3202a') + `<circle cx="-6" cy="8" r="2.4" fill="#d9343e"/><circle cx="5" cy="11" r="2" fill="#d9343e"/><circle cx="10" cy="-10" r="1.4" fill="#6b4a2a"/>`);
+      if (step === 1) return at(x, y, swelling(12) + gash('#d9534f'));
+      if (step === 2) return at(x, y, `<circle r="14" fill="#ffd36b" opacity=".45"/>` + gash('#d9534f'));
+      return at(x, y, gash('#f08080') + `<path d="M-11 -9 L-9 3 M-4 -7 L-2 5 M3 -7 L5 4 M10 -8 L12 2" stroke="#3b3540" stroke-width="2.2" stroke-linecap="round"/>`);
+    },
+  },
+
+  svalt: {
+    name: 'Har svalt något', species: ['hund', 'katt', 'gris', 'get', 'rav', 'hamster', 'ko', 'marsvin', 'kanin'], spots: ['body'], emergency: true,
+    problem: n => `${n} har svalt en strumpa! Den måste opereras ut.`,
+    event: n => `Akut! ${n} har svalt något konstigt.`,
+    steps: [
+      { tool: 'rontgen', action: 'hold', at: 'whole', hint: 'Ta en röntgenbild för att se var föremålet är.', done: 'Där är den! En strumpa i magen.' },
+      { tool: 'narkos', action: 'click', at: 'mouth', hint: 'Djuret måste sova under operationen så att det inte gör ont.', done: 'Djuret sover gott nu.' },
+      { tool: 'grip', action: 'slowpull', at: 'whole', hint: 'Plocka ut strumpan försiktigt.', done: 'Strumpan är ute!' },
+      { tool: 'nal', action: 'sew', at: 'whole', hint: 'Sy ihop operationssåret.', done: 'Fint sytt!' },
+      { tool: 'bandage', action: 'rub', at: 'whole', hint: 'Skydda såret på magen.', done: 'Operationen är klar!' },
+    ],
+    mark: 'bandage', markTime: 240,
+    draw: (x, y, step) => {
+      const sock = `<path d="M-8 -12 h10 v12 q8 0 8 8 q0 6 -8 6 h-6 q-6 0 -6 -6Z" fill="#e5484d" stroke="#fff" stroke-width="2"/><path d="M-8 -6 h10" stroke="#fff" stroke-width="2.5"/>`;
+      const box = inner => `<rect x="-28" y="-24" width="56" height="46" rx="8" fill="#1d2a3a" stroke="#9fd3ff" stroke-width="2.5"/>` + inner;
+      if (step === 0) return at(100, 150, `<circle r="24" fill="#ff9a9a" opacity=".35"/>` + painLines);
+      if (step <= 2) return at(100, 146, box(sock));
+      const cut = `<path d="M-14 0 H14" stroke="#d9343e" stroke-width="4" stroke-linecap="round"/>`;
+      if (step === 3) return at(100, 150, cut);
+      return at(100, 150, cut + `<path d="M-10 -5 V5 M-3 -5 V5 M4 -5 V5 M11 -5 V5" stroke="#3b3540" stroke-width="2.2" stroke-linecap="round"/>`);
+    },
+  },
+
+  vaccination: {
+    name: 'Vaccination', species: 'all', spots: ['body'], noDanger: true,
+    problem: n => `Det är dags för ${n} att vaccineras, så att djuret inte blir sjukt.`,
+    event: n => `Dags för vaccination! Ta med ${n} till kliniken.`,
+    steps: [
+      { tool: 'stetoskop', action: 'hold', at: 'whole', hint: 'Kolla först att djuret är friskt.', done: 'Hjärtat låter starkt och friskt.' },
+      { tool: 'spruta', action: 'hold', hint: 'Ge vaccinet med sprutan. Håll stilla!', done: 'Vaccinet är givet. Duktigt djur!' },
+      { tool: 'plaster', action: 'click', hint: 'Ett litet plåster där sprutan var.', done: 'Klart!' },
+    ],
+    mark: 'plaster', markTime: 120,
+    draw: (x, y, step) => step === 2 ? at(x, y, redDot) : '',
+  },
+
   skal: {
     name: 'Spricka i skalet', species: ['skoldpadda'], spots: ['body'],
     problem: n => `${n} har ramlat ner från en sten och fått en spricka i skalet.`,
@@ -349,7 +412,7 @@ function injuriesFor(species) {
 }
 
 function makeInjury(species, type) {
-  type = type || pick(injuriesFor(species));
+  type = type || pick(injuriesFor(species).filter(t => !INJURIES[t].emergency));
   const def = INJURIES[type];
   const spots = def.spots.filter(sp => SPECIES[species].spots[sp]);
   return { type, spot: pick(spots), step: 0 };
@@ -374,6 +437,8 @@ function drawMark(mark, sp) {
 function moodFor(a) {
   if (a.injury) {
     if (['feber', 'magont', 'forkylning'].includes(a.injury.type) && a.injury.step < 2) return 'sick';
+    if (a.injury.type === 'svalt' && a.injury.step >= 2) return 'sleep';
+    if (a.injury.type === 'vaccination') return 'neutral';
     return a.injury.step === 0 ? 'sad' : 'neutral';
   }
   const n = a.needs;

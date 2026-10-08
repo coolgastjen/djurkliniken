@@ -8,7 +8,7 @@ let _uid = 0;
 
 function eyesSvg([x1, x2, y], mood, r = 8) {
   const line = `fill="none" stroke="#2b2024" stroke-width="3.5" stroke-linecap="round"`;
-  if (mood === 'sick') {
+  if (mood === 'sick' || mood === 'sleep') {
     return `<path d="M${x1 - r} ${y} q${r} ${r * 0.7} ${r * 2} 0 M${x2 - r} ${y} q${r} ${r * 0.7} ${r * 2} 0" ${line}/>`;
   }
   if (mood === 'joy') {
@@ -33,6 +33,9 @@ function mouthSvg([x, y, w], mood) {
   const line = `fill="none" stroke="${OUT}" stroke-width="2.5" stroke-linecap="round"`;
   if (mood === 'sad') {
     return `<path d="M${x - w * 0.8} ${y + w * 0.6} Q${x} ${y - w * 0.3} ${x + w * 0.8} ${y + w * 0.6}" ${line}/>`;
+  }
+  if (mood === 'sleep') {
+    return `<ellipse cx="${x}" cy="${y + w * 0.3}" rx="${w * 0.3}" ry="${w * 0.25}" fill="#8a3341"/>`;
   }
   if (mood === 'sick') {
     return `<path d="M${x - w} ${y + 3} q${w / 2} -4 ${w} 0 q${w / 2} 4 ${w} 0" ${line}/>`;
@@ -691,6 +694,13 @@ function drawSkeleton(a, opts = {}) {
   return `<svg class="animal dead ${opts.still ? '' : 'anim'}" viewBox="0 0 200 200" style="overflow:visible">${s}</svg>`;
 }
 
+// Filt som värmer djuret på vintern
+function blanketSvg() {
+  return `<path d="M56 136 Q100 118 144 136 L140 178 Q100 188 60 178 Z" fill="#ff9fc0" ${SK}/>
+    <path d="M58 150 Q100 140 142 150 M59 164 Q100 156 141 164 M80 128 L76 182 M100 124 L100 186 M120 128 L124 182" fill="none" stroke="#ffd3e2" stroke-width="3"/>
+    <path d="M56 136 Q100 118 144 136 L140 178 Q100 188 60 178 Z" fill="none" ${SK}/>`;
+}
+
 // Grav: en jordhög med ett litet träkors
 function graveSvg() {
   return `<svg class="grave-svg" viewBox="0 0 120 90">
@@ -722,6 +732,7 @@ function drawAnimal(a, opts = {}) {
   if (a.acc && a.acc.neck) s += drawAccessory(a.acc.neck, sp);
   if (typeof drawMark === 'function' && a.mark && (!a.mark.until || a.mark.until > Date.now())) s += drawMark(a.mark, sp);
   if (typeof drawInjury === 'function' && a.injury) s += drawInjury(a, sp, c);
+  if (opts.warm) s += blanketSvg();
   if (a.acc && a.acc.face) s += drawAccessory(a.acc.face, sp);
   if (a.acc && a.acc.head) s += drawAccessory(a.acc.head, sp);
   if (opts.rider) s += riderFront();

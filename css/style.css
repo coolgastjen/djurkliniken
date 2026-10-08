@@ -481,3 +481,33 @@ body[data-scene="natt"] #garden-animals, body[data-scene="natt"] .play-pet, body
   .pill { padding: 2px 8px 2px 3px; gap: 3px; font-size: .9rem; }
   .pill .ico, .pill-ico { width: 22px; height: 22px; }
 }
+
+/* ---------- Sömn, kyla och rädsla ---------- */
+.pet .zzz { display: none; position: absolute; top: -4px; right: 8px; width: 40px; height: 40px; pointer-events: none; z-index: 2; }
+.pet.sleeping .zzz { display: block; }
+.zzz i { position: absolute; left: 0; bottom: 0; font-style: normal; font-weight: 700; font-size: 1rem; color: #4c6ef5;
+  text-shadow: 2px 0 #fff, -2px 0 #fff, 0 2px #fff, 0 -2px #fff; opacity: 0; animation: zfloat 3s ease-in infinite; }
+.zzz i:nth-child(2) { animation-delay: 1s; font-size: 1.2rem; }
+.zzz i:nth-child(3) { animation-delay: 2s; font-size: 1.4rem; }
+@keyframes zfloat { 0% { transform: translate(0, 0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(20px, -42px); opacity: 0; } }
+.pet.shiver .pet-svg { animation: shiver .14s linear infinite alternate; }
+.pet.scared .pet-svg { animation: shiver .07s linear infinite alternate; }
+@keyframes shiver { from { transform: translateX(-1.5px); } to { transform: translateX(1.5px); } }
+.anim.mood-sleep .tail { animation: none; }
+.anim.mood-sleep .breathe { animation-duration: 5s; }
+
+/* ---------- Akutfall ---------- */
+.akut-door { top: 96px; background: #ffe3e3; border-color: var(--red); animation: wiggle 1s ease-in-out infinite; }
+.akut-door .mini { background: #fff; }
+.akut-time { color: var(--red); }
+.timer-pill { background: #ffe3e3; padding: 3px 12px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.timer-pill.low { background: var(--red); color: #fff; animation: pulse .6s ease-in-out infinite; }
+
+/* Minispel: sy ihop såret */
+#sew-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.sew-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.sew-lines polyline { fill: none; stroke: #3b3540; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 8 5; }
+.sew-dot { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; border: 3px solid var(--ink);
+  background: #fff; font-weight: 700; font-size: 1.1rem; pointer-events: auto; box-shadow: var(--shadow); animation: pulse 1.2s ease-in-out infinite; }
+.sew-dot.done { background: var(--green); color: #fff; animation: none; }
+@media (max-width: 760px) { .akut-door { top: 88px; } }

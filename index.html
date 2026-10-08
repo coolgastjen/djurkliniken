@@ -6,7 +6,7 @@
 <title>Djurkliniken</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=10">
+<link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
 <div id="app">
@@ -66,6 +66,7 @@
       <div id="garden-graves"></div>
       <div id="garden-animals"></div>
       <button class="wild-door hidden" id="wild-door"></button>
+      <button class="wild-door akut-door hidden" id="akut-door"></button>
       <div class="empty-hint hidden" id="empty-hint">
         <p>Välkommen till din djurklinik! Du har inga egna djur än.</p>
         <button class="btn blue" data-go="adopt">Skaffa ditt första djur</button>
@@ -79,6 +80,7 @@
     <header class="topbar">
       <button class="icon-btn" id="treat-back" aria-label="Tillbaka"></button>
       <h2 id="treat-title">Behandlingsrummet</h2>
+      <span class="pill timer-pill hidden" id="treat-timer"></span>
       <span class="pill"><span class="pill-ico" data-icon="coin"></span><b class="coin-count">0</b></span>
     </header>
     <div class="treat-main">
@@ -89,6 +91,7 @@
           <div id="table-holder"></div>
         </div>
         <div class="target-ring hidden" id="target-ring"></div>
+        <div id="sew-layer"></div>
         <div id="fx-layer"></div>
       </div>
       <div class="treat-panel">
@@ -164,16 +167,16 @@
 <div id="toast-wrap"></div>
 <div id="tool-cursor" class="hidden"></div>
 
-<script src="js/sound.js?v=10"></script>
-<script src="js/state.js?v=10"></script>
-<script src="js/animals.js?v=10"></script>
-<script src="js/injuries.js?v=10"></script>
-<script src="js/art.js?v=10"></script>
-<script src="js/home.js?v=10"></script>
-<script src="js/treatment.js?v=10"></script>
-<script src="js/shop.js?v=10"></script>
-<script src="js/play.js?v=10"></script>
-<script src="js/walk.js?v=10"></script>
-<script src="js/main.js?v=10"></script>
+<script src="js/sound.js?v=11"></script>
+<script src="js/state.js?v=11"></script>
+<script src="js/animals.js?v=11"></script>
+<script src="js/injuries.js?v=11"></script>
+<script src="js/art.js?v=11"></script>
+<script src="js/home.js?v=11"></script>
+<script src="js/treatment.js?v=11"></script>
+<script src="js/shop.js?v=11"></script>
+<script src="js/play.js?v=11"></script>
+<script src="js/walk.js?v=11"></script>
+<script src="js/main.js?v=11"></script>
 </body>
 </html>

@@ -56,7 +56,10 @@ const TIME_MSG = { dag: 'God morgon! En ny dag börjar.', kvall: 'Solen går ner
 
 function announceChange(prev, sc) {
   if (!prev || currentScreen === 'start') return;
-  if (prev.season !== sc.season) toast(`Nu är det ${SEASON_NAMES[sc.season].toLowerCase()}!`, 'good');
+  if (prev.season !== sc.season) {
+    toast(`Nu är det ${SEASON_NAMES[sc.season].toLowerCase()}!`, 'good');
+    if (sc.season === 'vinter') toast('Ge djuren en filt eller halsduk så att de inte fryser!');
+  }
   else if (prev.time !== sc.time) toast(TIME_MSG[sc.time]);
   if (prev.weather !== sc.weather) {
     const winter = sc.season === 'vinter';
@@ -115,7 +118,7 @@ function openThemePicker() {
 
 // Åskmuller ibland när det åskar
 function maybeThunder() {
-  if (currentT && currentT.lightning && ['home', 'play', 'walk'].includes(currentScreen) && Math.random() < 0.12) Sound.thunder();
+  if (currentT && currentT.lightning && ['home', 'play', 'walk'].includes(currentScreen) && Math.random() < 0.12) { Sound.thunder(); Home.scare(); }
 }
 
 function updateHud() {

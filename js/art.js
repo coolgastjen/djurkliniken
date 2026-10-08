@@ -361,6 +361,15 @@ TOOL_ICONS.orondroppar = `<path d="M22 30 h20 v24 q0 4 -4 4 h-12 q-4 0 -4 -4Z" f
 TOOL_ICONS.kylpase = `<rect x="8" y="14" width="48" height="36" rx="10" fill="#a5d8ff" ${S3}/><path d="M32 20 V44 M21 26 L43 38 M43 26 L21 38" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
   <path d="M28 20 l4 4 l4 -4 M28 44 l4 -4 l4 4" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`;
 
+TOOL_ICONS.nal = `${strokeOut('M14 52 L46 18', '#c3ccd6', 3)}<circle cx="46" cy="18" r="4" fill="none" stroke="${OUT}" stroke-width="2.5"/>
+  <path d="M46 18 Q60 30 44 40 Q28 52 54 58" fill="none" stroke="#e5484d" stroke-width="3" stroke-linecap="round"/>`;
+TOOL_ICONS.spruta = `<g transform="rotate(-45 32 32)"><rect x="16" y="25" width="28" height="14" rx="2" fill="#e7f5ff" ${S3}/><rect x="20" y="28" width="14" height="8" fill="#74c0fc"/>
+  <path d="M44 32 H60" stroke="${OUT}" stroke-width="3" stroke-linecap="round"/><path d="M6 32 H16 M6 24 V40" stroke="${OUT}" stroke-width="4" stroke-linecap="round"/></g>`;
+TOOL_ICONS.narkos = `<path d="M8 30 Q32 18 56 30" fill="none" stroke="#adb5bd" stroke-width="3"/><path d="M16 24 Q32 12 48 24 L44 44 Q32 54 20 44Z" fill="#a5d8ff" ${S3}/>
+  <path d="M24 32 Q32 26 40 32" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>${strokeOut('M32 50 Q32 60 48 58', '#74c0fc', 4)}`;
+TOOL_ICONS.grip = `${strokeOut('M12 52 L42 20', '#c3ccd6', 4)}${strokeOut('M18 58 L46 26', '#c3ccd6', 4)}
+  <circle cx="10" cy="52" r="6" fill="none" stroke="${OUT}" stroke-width="3"/><circle cx="18" cy="60" r="6" fill="none" stroke="${OUT}" stroke-width="3"/><path d="M42 20 L50 10 M46 26 L56 18" stroke="${OUT}" stroke-width="3" stroke-linecap="round"/>`;
+
 const FOODS = {
   hundgodis: { name: 'Hundgodis', likes: ['hund'] },
   kattmat: { name: 'Kattmat', likes: ['katt', 'igelkott', 'rav'] },
@@ -414,6 +423,7 @@ const UI_ICONS = {
   door: `<rect x="14" y="6" width="36" height="52" rx="4" fill="#ffd8a8" ${S3}/><circle cx="42" cy="34" r="3" fill="${OUT}"/><path d="M24 18 h16 v4 h-16Z" fill="#e5484d"/>`,
   home: `<path d="M8 30 L32 10 L56 30 V54 H8Z" fill="#ffd8a8" ${S3}/><rect x="26" y="36" width="12" height="18" fill="#c97b3c" ${S3}/>`,
   skull: `<path d="M12 30 a20 20 0 1 1 40 0 v8 q0 6 -6 6 h-2 v8 h-24 v-8 h-2 q-6 0 -6 -6Z" fill="#fff" ${S3}/><circle cx="24" cy="31" r="5" fill="${OUT}"/><circle cx="40" cy="31" r="5" fill="${OUT}"/><path d="M29 42 l3 -5 l3 5Z" fill="${OUT}"/><path d="M26 46 v6 M32 46 v6 M38 46 v6" stroke="${OUT}" stroke-width="2"/>`,
+  snow: `<g stroke="#4dabf7" stroke-width="4" stroke-linecap="round"><path d="M32 8 V56 M11 20 L53 44 M53 20 L11 44"/><path d="M26 12 l6 6 l6 -6 M26 52 l6 -6 l6 6"/></g>`,
   scene: `<circle cx="24" cy="24" r="13" fill="#ffd43b" ${S3}/><path d="M50 38 A16 16 0 1 1 34 20 A12 12 0 0 0 50 38Z" fill="#4c6ef5" ${S3}/><circle cx="16" cy="50" r="2.5" fill="#74c0fc"/><circle cx="26" cy="56" r="2" fill="#74c0fc"/>`,
 };
 

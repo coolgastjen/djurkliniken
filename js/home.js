@@ -28,6 +28,7 @@ const Home = {
 
   setup() {
     $('#wild-door').addEventListener('click', () => { Sound.click(); show('treat', 'wild'); });
+    $('#akut-door').addEventListener('click', () => { Sound.click(); show('treat', 'akut'); });
     if (location.search.includes('test')) this.setupDebug();
   },
 
@@ -35,17 +36,19 @@ const Home = {
     this.renderGraves();
     this.renderPets(true);
     this.renderWild();
+    this.renderAkut(true);
   },
 
   // ---------- Djuren i trädgården ----------
 
   petMood(a) {
     if ((this.joyUntil[a.id] || 0) > Date.now()) return 'joy';
+    if (a.sleeping && !a.injury && !a.dead) return 'sleep';
     return moodFor(a);
   },
 
   visualKey(a, mood) {
-    return JSON.stringify([mood, a.color, a.injury, a.mark && a.mark.kind, a.acc, !!a.dead]);
+    return JSON.stringify([mood, a.color, a.injury, a.mark && a.mark.kind, a.acc, !!a.dead, a.warm > 0]);
   },
 
   renderPets(force = false) {
@@ -65,7 +68,7 @@ const Home = {
       if (!el) {
         el = document.createElement('div');
         el.className = 'pet';
-        el.innerHTML = `<div class="bubble hidden"></div><div class="pet-svg"></div><div class="nametag"></div>`;
+        el.innerHTML = `<div class="bubble hidden"></div><div class="zzz"><i>z</i><i>z</i><i>Z</i></div><div class="pet-svg"></div><div class="nametag"></div>`;
         el.style.left = a.x + '%';
         el.style.top = a.y + '%';
         el.addEventListener('click', () => { Sound.pop(); this.openCard(a.id); });
@@ -76,12 +79,14 @@ const Home = {
       const key = this.visualKey(a, mood);
       if (force || el.dataset.key !== key) {
         el.dataset.key = key;
-        el.querySelector('.pet-svg').innerHTML = drawAnimal(a, { mood });
+        el.querySelector('.pet-svg').innerHTML = drawAnimal(a, { mood, warm: a.warm > 0 });
       }
       el.querySelector('.nametag').textContent = a.name;
       el.style.zIndex = Math.round(a.y);
       el.classList.toggle('limping', !!a.injury && !a.dead);
       el.classList.toggle('dead', !!a.dead);
+      el.classList.toggle('sleeping', !!a.sleeping && !a.dead && !a.injury);
+      el.classList.toggle('shiver', !!a.cold && !a.dead);
       this.renderBubble(a, el.querySelector('.bubble'));
     }
   },
@@ -103,6 +108,8 @@ const Home = {
     if (a.dead) kind = null;
     else if (a.danger > 0 || (a.injury && a.injury.age >= INJURY_WARN)) kind = 'danger';
     else if (a.injury) kind = 'alert';
+    else if (a.sleeping) kind = null;
+    else if (a.cold) kind = 'cold';
     else {
       const low = Object.keys(NEED_INFO).filter(k => a.needs[k] < 30).sort((x, y) => a.needs[x] - a.needs[y])[0];
       if (low) kind = low;
@@ -112,6 +119,7 @@ const Home = {
     b.classList.toggle('hidden', !kind);
     b.classList.toggle('alert', kind === 'alert' || kind === 'danger');
     if (kind === 'danger') b.innerHTML = uiIcon('skull');
+    else if (kind === 'cold') b.innerHTML = uiIcon('snow');
     else if (kind === 'alert') b.innerHTML = uiIcon('cross');
     else if (kind) b.innerHTML = uiIcon(NEED_INFO[kind].icon);
   },
@@ -119,7 +127,7 @@ const Home = {
   wander() {
     for (const a of Game.s.animals) {
       const el = this.els[a.id];
-      if (!el || a.dead || Math.random() > (a.injury ? 0.08 : 0.3)) continue;
+      if (!el || a.dead || a.sleeping || Math.random() > (a.injury ? 0.08 : 0.3)) continue;
       const nx = clamp(a.x + (Math.random() - 0.5) * (a.injury ? 10 : 34), 8, 92);
       const ny = clamp(a.y + (Math.random() - 0.5) * 18, 55, 94);
       a.x = nx; a.y = ny;
@@ -159,22 +167,95 @@ const Home = {
     this.renderWild();
   },
 
+  // ---------- Akutfall ----------
+
+  renderAkut(full = false) {
+    const ak = Game.s.akut;
+    const door = $('#akut-door');
+    door.classList.toggle('hidden', !ak);
+    if (!ak) { door.dataset.id = ''; return; }
+    const t = Math.max(0, Math.ceil(ak.timeLeft));
+    const time = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+    if (full || door.dataset.id !== ak.species + ak.color) {
+      door.dataset.id = ak.species + ak.color;
+      door.innerHTML = `<div class="mini">${drawAnimal(ak, { mood: moodFor(ak), still: true })}</div>
+        <div>AKUT! En skadad ${SPECIES[ak.species].name.toLowerCase()} behöver hjälp nu!<small>Tid kvar: <b class="akut-time">${time}</b></small></div>`;
+    } else {
+      door.querySelector('.akut-time').textContent = time;
+    }
+  },
+
+  spawnAkut() {
+    const species = pick(SPECIES_ORDER);
+    const type = INJURIES.svalt.species.includes(species) && Math.random() < 0.4 ? 'svalt' : 'djuptsar';
+    Game.s.akut = {
+      id: -2, wild: true, akut: true, species, color: Math.floor(Math.random() * SPECIES[species].colors.length),
+      name: SPECIES_DEF[species], needs: { food: 60, water: 60, joy: 30, clean: 60 },
+      injury: makeInjury(species, type), mark: null, acc: { head: null, neck: null, face: null },
+      timeLeft: type === 'svalt' ? 110 : 90,
+    };
+    Sound.siren();
+    toast(`Akut! En ambulans kommer med en skadad ${SPECIES[species].name.toLowerCase()}. Skynda dig!`, 'alert');
+    this.renderAkut(true);
+  },
+
+  akutFailed() {
+    const ak = Game.s.akut;
+    Game.s.akut = null;
+    Sound.sad();
+    const msg = `Tiden tog slut! Ambulansen körde vidare med ${ak.name.toLowerCase()} till det stora djursjukhuset. Där får den hjälp. Nästa gång kanske du hinner!`;
+    if (currentScreen === 'treat' && Treat.kind === 'akut') {
+      Treat.finished = true;
+      Treat.placeRing();
+      openModal(`<div class="celebrate"><h2 style="color:var(--red)">Tiden tog slut!</h2><p>${esc(msg)}</p>
+        <div class="modal-footer"><button class="btn big" id="ak-home">Tillbaka till gården</button></div></div>`, true);
+      $('#ak-home').onclick = () => { Sound.click(); show('home'); };
+    } else {
+      toast(msg, 'alert');
+    }
+    this.renderAkut();
+    Game.save();
+  },
+
   // ---------- Tiden går ----------
 
   tick(dt) {
     const s = Game.s;
+    const T = typeof currentT !== 'undefined' ? currentT : null;
+    const night = !!T && T.time === 'natt';
+    const winter = !!T && T.season === 'vinter';
     for (const a of s.animals) {
       if (a.dead) continue;
+      a.sleeping = night && !a.injury;
+      a.warm = Math.max(0, (a.warm || 0) - dt);
+      a.cold = winter && !a.sleeping && a.warm <= 0 && a.acc.neck !== 'scarf';
       for (const k in NEED_RATES) {
         let rate = NEED_RATES[k];
         if (k === 'joy' && a.injury) rate *= 2;
+        if (a.sleeping) rate *= 0.4;
+        if (k === 'clean' && T && T.rain) rate *= 3;
+        if (k === 'joy' && T && T.storm) rate *= 1.5;
+        if (k === 'joy' && a.cold) rate *= 2;
         a.needs[k] = clamp(a.needs[k] - rate * dt);
       }
       if (a.mark && a.mark.until < Date.now()) a.mark = null;
       this.checkDanger(a, dt);
     }
 
+    const ak = s.akut;
+    if (ak && !ak.saved) {
+      ak.timeLeft -= dt;
+      if (currentScreen === 'treat' && Treat.kind === 'akut') Treat.updateTimer();
+      else if (currentScreen === 'home') this.renderAkut();
+      if (ak.timeLeft <= 0) this.akutFailed();
+    }
+
     if (currentScreen !== 'home') return;
+    s.timers.akut = (s.timers.akut === undefined ? 90 : s.timers.akut) - dt;
+    if (s.timers.akut <= 0) {
+      s.timers.akut = 160 + Math.random() * 140;
+      if (!s.akut) this.spawnAkut();
+    }
     s.timers.injury -= dt;
     s.timers.wild -= dt;
     if (s.timers.injury <= 0) {
@@ -205,7 +286,7 @@ const Home = {
       a.danger = 0;
       a.warned = false;
     }
-    if (a.injury && !(currentScreen === 'treat' && Treat.a === a)) {
+    if (a.injury && !INJURIES[a.injury.type].noDanger && !(currentScreen === 'treat' && Treat.a === a)) {
       a.injury.age = (a.injury.age || 0) + dt;
       if (a.injury.age >= INJURY_WARN && !a.injury.warned) {
         a.injury.warned = true;
@@ -271,10 +352,12 @@ const Home = {
     if (!a) { closeModal(); return; }
     const sp = SPECIES[a.species];
     if (a.dead) { this.renderDeadCard(a, sp, says); return; }
+    if (!says && a.sleeping && !a.injury) says = 'Zzz...';
     const mood = this.petMood(a);
     const meters = Object.keys(NEED_INFO).map(k =>
       `<div class="meter" title="${NEED_INFO[k].name}"><span class="m-ico">${uiIcon(NEED_INFO[k].icon)}</span><div class="bar"><i data-need="${k}"></i></div></div>`).join('');
     const hurt = !!a.injury;
+    const asleep = !!a.sleeping && !hurt;
     const btn = (act, ico, label, dis = false) =>
       `<button class="care-btn" data-act="${act}" ${dis ? 'disabled' : ''}>${ico}${label}</button>`;
     $('#card').innerHTML = `
@@ -292,10 +375,11 @@ const Home = {
         ${btn('food', uiIcon('food'), 'Mata')}
         ${btn('water', uiIcon('water'), 'Vatten')}
         ${btn('cuddle', uiIcon('heart'), 'Gosa')}
-        ${btn('play', uiIcon('ball'), 'Apport', hurt)}
-        ${a.species === 'hast' ? btn('walk', uiIcon('horseshoe'), 'Rida', hurt) : btn('walk', uiIcon('leash'), 'Promenad', hurt)}
+        ${btn('play', uiIcon('ball'), asleep ? 'Sover' : 'Apport', hurt || asleep)}
+        ${a.species === 'hast' ? btn('walk', uiIcon('horseshoe'), asleep ? 'Sover' : 'Rida', hurt || asleep) : btn('walk', uiIcon('leash'), asleep ? 'Sover' : 'Promenad', hurt || asleep)}
         ${btn('wash', uiIcon('brush'), 'Bada')}
         ${btn('acc', uiIcon('bow'), 'Klä ut')}
+        ${btn('blanket', toolIcon('filt'), a.warm > 0 ? 'Varm' : 'Filt')}
       </div>
       <div class="card-sub" id="card-sub"></div>
       <div class="modal-footer"><button class="btn white" data-act="close">Stäng</button></div>`;
@@ -428,6 +512,12 @@ const Home = {
         Sound.click();
         show('walk', a.id);
         return;
+      case 'blanket':
+        a.warm = 240;
+        a.cold = false;
+        Sound.pop();
+        this.joy(a, 'Mysigt och varmt!');
+        break;
       case 'wash':
         if (n.clean > 92) { this.renderCard(`${a.name} är redan ren!`); return; }
         n.clean = 100;
@@ -491,6 +581,15 @@ const Home = {
     input.addEventListener('keydown', e => { if (e.key === 'Enter') done(true); });
   },
 
+  // Djuren blir rädda när det åskar
+  scare() {
+    for (const id in this.els) {
+      const el = this.els[id];
+      el.classList.add('scared');
+      setTimeout(() => el.classList.remove('scared'), 1300);
+    }
+  },
+
   hearts() {
     const p = $('.card-portrait');
     if (!p) return;
@@ -516,7 +615,7 @@ const Home = {
     const types = Object.keys(INJURIES);
     p.innerHTML = '<b style="width:100%">Test: skada första djuret</b>' +
       types.map(t => `<button data-t="${t}">${t}</button>`).join('') +
-      '<button data-x="wild">vild patient</button><button data-x="coins">+100 mynt</button><button data-x="low">behov låga</button><button data-x="die">dö</button><button data-x="dieall">döda alla</button>';
+      '<button data-x="wild">vild patient</button><button data-x="coins">+100 mynt</button><button data-x="low">behov låga</button><button data-x="die">dö</button><button data-x="dieall">döda alla</button><button data-x="akut">akutfall</button>';
     p.addEventListener('click', e => {
       const b = e.target.closest('button');
       if (!b) return;
@@ -527,6 +626,7 @@ const Home = {
         this.injure(a, b.dataset.t);
       }
       if (b.dataset.x === 'wild') { Game.s.wild = null; this.spawnWild(); }
+      if (b.dataset.x === 'akut') { Game.s.akut = null; this.spawnAkut(); }
       if (b.dataset.x === 'coins') { Game.addCoins(100); updateHud(); }
       if (b.dataset.x === 'die' && a) this.die(a, 'svalt');
       if (b.dataset.x === 'dieall') Game.s.animals.filter(x => !x.dead).forEach(x => this.die(x, 'svalt'));
