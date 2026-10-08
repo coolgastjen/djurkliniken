@@ -617,10 +617,85 @@ function riderFront() {
   <path d="M70 70 Q74 90 82 108 M130 70 Q126 90 118 108" fill="none" stroke="#7a4a22" stroke-width="3" stroke-linecap="round"/>`;
 }
 
+// ---------- Skelett (när ett djur har dött) ----------
+
+const SKELETON = {
+  hund: { skull: 'round', tail: 'long', size: 0.9 }, katt: { skull: 'round', tail: 'long', size: 0.85 },
+  kanin: { skull: 'round', tail: 'none', size: 0.75 }, marsvin: { skull: 'round', tail: 'none', size: 0.7 },
+  hamster: { skull: 'round', tail: 'none', size: 0.6 }, hast: { skull: 'long', tail: 'short', size: 1.15 },
+  ko: { skull: 'long', tail: 'long', size: 1.15, horns: true }, gris: { skull: 'round', tail: 'curl', size: 1 },
+  get: { skull: 'long', tail: 'short', size: 1, horns: true }, fagel: { skull: 'beak', bird: true, size: 0.7 },
+  anka: { skull: 'beak', bird: true, size: 0.8 }, skoldpadda: { shell: true, size: 0.85 },
+  igelkott: { skull: 'round', tail: 'none', size: 0.65, spikes: true }, rav: { skull: 'round', tail: 'long', size: 0.9 },
+  ekorre: { skull: 'round', tail: 'long', size: 0.7 },
+};
+
+const BONE = '#fbf7ee';
+function bone(x1, y1, x2, y2, w = 7) {
+  return `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="${OUT}" stroke-width="${w + 5}" stroke-linecap="round"/>` +
+    `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="${BONE}" stroke-width="${w}" stroke-linecap="round"/>` +
+    `<circle cx="${x2}" cy="${y2}" r="${w * 0.7}" fill="${BONE}" stroke="${OUT}" stroke-width="2.5"/>`;
+}
+const xEye = (x, y, r = 4.5) => `<path d="M${x - r} ${y - r} L${x + r} ${y + r} M${x + r} ${y - r} L${x - r} ${y + r}" stroke="${OUT}" stroke-width="3" stroke-linecap="round"/>`;
+
+function skullSvg(k) {
+  const B = `fill="${BONE}" ${SK}`;
+  if (k.skull === 'long') {
+    return (k.horns ? `${bone(56, 132, 66, 112, 5)}${bone(64, 134, 80, 118, 5)}` : '') +
+      `<path d="M10 150 Q8 136 24 132 L56 128 Q72 130 72 146 Q72 162 56 164 L24 166 Q10 164 10 150Z" ${B}/>` +
+      xEye(54, 142) + `<ellipse cx="18" cy="147" rx="3" ry="2.2" fill="${OUT}"/><path d="M20 160 h28 M26 156 v8 M34 156 v8 M42 156 v8" stroke="${OUT}" stroke-width="2"/>`;
+  }
+  if (k.skull === 'beak') {
+    return `<path d="M38 140 L14 148 L38 156Z" ${B}/><circle cx="50" cy="146" r="17" ${B}/>` + xEye(52, 142, 4);
+  }
+  return `<path d="M22 146 a22 22 0 1 1 44 0 v8 q0 8 -8 8 h-28 q-8 0 -8 -8 Z" ${B}/>` +
+    xEye(36, 144) + xEye(52, 144) + `<path d="M41 155 l3 -5 l3 5Z" fill="${OUT}"/><path d="M34 162 v-5 M40 162 v-5 M46 162 v-5 M52 162 v-5" stroke="${OUT}" stroke-width="2"/>`;
+}
+
+function drawSkeleton(a, opts = {}) {
+  const k = SKELETON[a.species] || SKELETON.hund;
+  const B = `fill="${BONE}" ${SK}`;
+  let s = `<ellipse cx="100" cy="188" rx="70" ry="7" fill="#000" opacity=".12"/>`;
+  let body = '';
+  if (k.shell) {
+    body += bone(60, 172, 48, 186, 5) + bone(150, 172, 162, 186, 5) +
+      `<path d="M40 176 Q40 104 110 100 Q174 104 172 176Z" fill="#c9b98a" ${SK}/>` +
+      `<path d="M96 116 L124 116 L134 140 L124 164 L96 164 L86 140Z M60 150 L76 128 M158 150 L142 128" fill="none" stroke="#8a7a52" stroke-width="3"/>` +
+      `<path d="M120 104 L126 120 L118 132 L128 146" fill="none" stroke="${OUT}" stroke-width="3" stroke-linecap="round"/>` +
+      `<circle cx="30" cy="164" r="15" ${B}/>` + xEye(26, 161, 3.5) + xEye(36, 161, 3.5);
+  } else if (k.bird) {
+    body += bone(98, 160, 92, 186, 4) + bone(112, 160, 118, 186, 4) +
+      `<path d="M88 188 h10 M112 188 h12" stroke="${OUT}" stroke-width="3" stroke-linecap="round"/>` +
+      bone(104, 146, 124, 120, 5) + bone(124, 120, 146, 126, 4) +
+      `<path d="M62 150 Q100 140 132 152" fill="none" stroke="${OUT}" stroke-width="11" stroke-linecap="round"/><path d="M62 150 Q100 140 132 152" fill="none" stroke="${BONE}" stroke-width="6" stroke-linecap="round"/>`;
+    for (let x = 80; x <= 112; x += 10) body += `<path d="M${x} 147 Q${x + 9} 158 ${x + 2} 168" fill="none" stroke="${OUT}" stroke-width="7" stroke-linecap="round"/><path d="M${x} 147 Q${x + 9} 158 ${x + 2} 168" fill="none" stroke="${BONE}" stroke-width="3.5" stroke-linecap="round"/>`;
+    body += skullSvg(k);
+  } else {
+    body += bone(80, 160, 66, 184) + bone(92, 162, 94, 186) + bone(126, 160, 118, 185) + bone(138, 160, 148, 184);
+    body += `<path d="M58 150 Q100 138 144 154" fill="none" stroke="${OUT}" stroke-width="13" stroke-linecap="round"/><path d="M58 150 Q100 138 144 154" fill="none" stroke="${BONE}" stroke-width="8" stroke-linecap="round"/>`;
+    for (const [x, y] of [[70, 146], [84, 143], [98, 142], [112, 143], [126, 147]]) body += `<circle cx="${x}" cy="${y - 5}" r="4" ${B}/>`;
+    for (let x = 76; x <= 116; x += 10) body += `<path d="M${x} 147 Q${x + 11} 160 ${x + 2} 174" fill="none" stroke="${OUT}" stroke-width="8" stroke-linecap="round"/><path d="M${x} 147 Q${x + 11} 160 ${x + 2} 174" fill="none" stroke="${BONE}" stroke-width="4" stroke-linecap="round"/>`;
+    body += `<ellipse cx="142" cy="157" rx="11" ry="9" ${B}/>`;
+    if (k.tail === 'long') [[154, 154, 4.2], [162, 151, 3.8], [170, 148, 3.4], [178, 146, 3], [185, 145, 2.6]].forEach(([x, y, r]) => { body += `<circle cx="${x}" cy="${y}" r="${r}" ${B}/>`; });
+    if (k.tail === 'short') [[155, 156, 4], [163, 158, 3.4]].forEach(([x, y, r]) => { body += `<circle cx="${x}" cy="${y}" r="${r}" ${B}/>`; });
+    if (k.tail === 'curl') body += `<path d="M152 154 q12 -4 10 -14 q-3 -7 -9 -2" fill="none" stroke="${OUT}" stroke-width="8" stroke-linecap="round"/><path d="M152 154 q12 -4 10 -14 q-3 -7 -9 -2" fill="none" stroke="${BONE}" stroke-width="4" stroke-linecap="round"/>`;
+    if (k.spikes) [[60, 182, -30], [150, 184, 20], [110, 190, 70], [40, 186, -60], [170, 180, 40]].forEach(([x, y, r]) => { body += `<path d="M${x} ${y} l12 0" stroke="#6e4b30" stroke-width="3" stroke-linecap="round" transform="rotate(${r} ${x} ${y})"/>`; });
+    body += skullSvg(k);
+  }
+  s += `<g transform="translate(100 186) scale(${k.size}) translate(-100 -186)">${body}</g>`;
+  // Ett litet spöke som svävar ovanför
+  if (!opts.noGhost) {
+    s += `<g class="ghost"><path d="M84 92 Q84 60 100 60 Q116 60 116 92 l-5 -5 l-5 5 l-6 -5 l-6 5 l-5 -5 Z" fill="#fff" fill-opacity=".85" stroke="#b9c4d0" stroke-width="2"/>
+      <circle cx="94" cy="76" r="2.6" fill="${OUT}"/><circle cx="106" cy="76" r="2.6" fill="${OUT}"/><ellipse cx="100" cy="84" rx="3" ry="2.2" fill="${OUT}"/></g>`;
+  }
+  return `<svg class="animal dead ${opts.still ? '' : 'anim'}" viewBox="0 0 200 200" style="overflow:visible">${s}</svg>`;
+}
+
 // ---------- Rita ett helt djur ----------
 
 // opts: { mood, still (inga animationer), cls }
 function drawAnimal(a, opts = {}) {
+  if (a.dead) return drawSkeleton(a, opts);
   const sp = SPECIES[a.species];
   const c = sp.colors[a.color] || sp.colors[0];
   const mood = opts.mood || 'happy';

@@ -459,3 +459,9 @@ body[data-scene="natt"] #garden-animals, body[data-scene="natt"] .play-pet, body
   .drop { display: none; }
   .lightning { animation: none; }
 }
+
+/* ---------- Döda djur ---------- */
+.pet.dead .nametag { background: #e9e4df; color: var(--ink-soft); }
+.anim .ghost { transform-box: fill-box; transform-origin: center; animation: ghostfloat 3s ease-in-out infinite; }
+@keyframes ghostfloat { 0%, 100% { transform: translateY(0); opacity: .9; } 50% { transform: translateY(-10px); opacity: .6; } }
+.dead-note { color: var(--ink-soft); margin: 12px 0 0; }

@@ -14,6 +14,12 @@ const SPECIES_DEF = {
   anka: 'Ankan', skoldpadda: 'Sköldpaddan', rav: 'Räven', ekorre: 'Ekorren', hamster: 'Hamstern',
 };
 
+// Hur länge ett djur klarar sig (sekunder i spelet)
+const DEATH_STARVE = 90;     // helt slut på mat eller vatten
+const INJURY_WARN = 300;     // varning för obehandlad skada
+const INJURY_DEATH = 480;    // obehandlad skada
+const REVIVE_PRICE = 50;
+
 const Home = {
   els: {},          // id -> DOM-element för varje djur i trädgården
   joyUntil: {},     // id -> tidpunkt då "jätteglad"-minen slutar
@@ -69,14 +75,17 @@ const Home = {
       }
       el.querySelector('.nametag').textContent = a.name;
       el.style.zIndex = Math.round(a.y);
-      el.classList.toggle('limping', !!a.injury);
+      el.classList.toggle('limping', !!a.injury && !a.dead);
+      el.classList.toggle('dead', !!a.dead);
       this.renderBubble(a, el.querySelector('.bubble'));
     }
   },
 
   renderBubble(a, b) {
     let kind = null;
-    if (a.injury) kind = 'alert';
+    if (a.dead) kind = null;
+    else if (a.danger > 0 || (a.injury && a.injury.age >= INJURY_WARN)) kind = 'danger';
+    else if (a.injury) kind = 'alert';
     else {
       const low = Object.keys(NEED_INFO).filter(k => a.needs[k] < 30).sort((x, y) => a.needs[x] - a.needs[y])[0];
       if (low) kind = low;
@@ -84,15 +93,16 @@ const Home = {
     if (b.dataset.kind === (kind || '')) return;
     b.dataset.kind = kind || '';
     b.classList.toggle('hidden', !kind);
-    b.classList.toggle('alert', kind === 'alert');
-    if (kind === 'alert') b.innerHTML = uiIcon('cross');
+    b.classList.toggle('alert', kind === 'alert' || kind === 'danger');
+    if (kind === 'danger') b.innerHTML = uiIcon('skull');
+    else if (kind === 'alert') b.innerHTML = uiIcon('cross');
     else if (kind) b.innerHTML = uiIcon(NEED_INFO[kind].icon);
   },
 
   wander() {
     for (const a of Game.s.animals) {
       const el = this.els[a.id];
-      if (!el || Math.random() > (a.injury ? 0.08 : 0.3)) continue;
+      if (!el || a.dead || Math.random() > (a.injury ? 0.08 : 0.3)) continue;
       const nx = clamp(a.x + (Math.random() - 0.5) * (a.injury ? 10 : 34), 8, 92);
       const ny = clamp(a.y + (Math.random() - 0.5) * 18, 55, 94);
       a.x = nx; a.y = ny;
@@ -137,12 +147,14 @@ const Home = {
   tick(dt) {
     const s = Game.s;
     for (const a of s.animals) {
+      if (a.dead) continue;
       for (const k in NEED_RATES) {
         let rate = NEED_RATES[k];
         if (k === 'joy' && a.injury) rate *= 2;
         a.needs[k] = clamp(a.needs[k] - rate * dt);
       }
       if (a.mark && a.mark.until < Date.now()) a.mark = null;
+      this.checkDanger(a, dt);
     }
 
     if (currentScreen !== 'home') return;
@@ -161,10 +173,50 @@ const Home = {
     if (this.cardId) this.refreshMeters();
   },
 
+  // Svält, törst och obehandlade skador kan till slut döda djuret
+  checkDanger(a, dt) {
+    const hungry = a.needs.food <= 0;
+    if (hungry || a.needs.water <= 0) {
+      a.danger = (a.danger || 0) + dt;
+      if (!a.warned) {
+        a.warned = true;
+        Sound.alert();
+        toast(hungry ? `${a.name} svälter! Ge mat snabbt, annars dör djuret.` : `${a.name} är jättetörstig! Ge vatten snabbt, annars dör djuret.`, 'alert');
+      }
+      if (a.danger >= DEATH_STARVE) { this.die(a, hungry ? 'svalt' : 'torst'); return; }
+    } else {
+      a.danger = 0;
+      a.warned = false;
+    }
+    if (a.injury && !(currentScreen === 'treat' && Treat.a === a)) {
+      a.injury.age = (a.injury.age || 0) + dt;
+      if (a.injury.age >= INJURY_WARN && !a.injury.warned) {
+        a.injury.warned = true;
+        Sound.alert();
+        toast(`${a.name} har haft ont länge. Hjälp djuret på kliniken snabbt!`, 'alert');
+      }
+      if (a.injury.age >= INJURY_DEATH) this.die(a, 'skada');
+    }
+  },
+
+  die(a, cause) {
+    a.dead = { cause };
+    a.injury = null;
+    a.mark = null;
+    a.danger = 0;
+    Sound.sad();
+    toast(`${a.name} har dött...`, 'alert');
+    const busy = (currentScreen === 'treat' && Treat.a === a) || (currentScreen === 'play' && Play.a === a) || (currentScreen === 'walk' && Walk.a === a);
+    if (busy) show('home');
+    this.renderPets();
+    if (this.cardId === a.id) this.renderCard();
+    Game.save();
+  },
+
   randomInjury(forceType) {
     const s = Game.s;
     const injured = s.animals.filter(a => a.injury).length;
-    const healthy = s.animals.filter(a => !a.injury);
+    const healthy = s.animals.filter(a => !a.injury && !a.dead);
     if (!healthy.length) return;
     if (!forceType && (injured >= 2 || Math.random() > 0.55)) return;
     const a = pick(healthy);
@@ -201,6 +253,7 @@ const Home = {
     const a = Game.get(this.cardId);
     if (!a) { closeModal(); return; }
     const sp = SPECIES[a.species];
+    if (a.dead) { this.renderDeadCard(a, sp, says); return; }
     const mood = this.petMood(a);
     const meters = Object.keys(NEED_INFO).map(k =>
       `<div class="meter" title="${NEED_INFO[k].name}"><span class="m-ico">${uiIcon(NEED_INFO[k].icon)}</span><div class="bar"><i data-need="${k}"></i></div></div>`).join('');
@@ -231,6 +284,24 @@ const Home = {
       <div class="modal-footer"><button class="btn white" data-act="close">Stäng</button></div>`;
     this.refreshMeters();
     this.renderSub();
+    $$('#card [data-act]').forEach(el => el.addEventListener('click', () => this.action(el.dataset.act)));
+  },
+
+  renderDeadCard(a, sp, confirmBury) {
+    const cause = { svalt: 'svalt ihjäl', torst: 'dog av törst', skada: 'dog av sin skada' }[a.dead.cause] || 'har dött';
+    $('#card').innerHTML = `
+      <div class="card-head">
+        <div class="card-portrait">${drawAnimal(a)}</div>
+        <div><h2>Här vilar ${esc(a.name)}</h2><p>${sp.name} · ${esc(a.name)} ${cause}.</p></div>
+      </div>
+      <p class="dead-note">Djur dör om de inte får mat, vatten eller vård i tid. Med mirakelmedicin kan du väcka ${esc(a.name)} till liv igen. Om du begraver djuret blir platsen ledig för ett nytt.</p>
+      ${confirmBury === 'bury' ? `<div class="injury-alert"><p>Vill du begrava ${esc(a.name)}? Det går inte att ångra.</p>
+        <div class="modal-footer" style="margin:0"><button class="btn white" data-act="bury-no">Nej</button><button class="btn red" data-act="bury-yes">Ja, begrav</button></div></div>` : ''}
+      <div class="modal-footer">
+        <button class="btn green" data-act="revive" ${Game.s.coins < REVIVE_PRICE ? 'disabled' : ''}>Mirakelmedicin · ${uiIcon('coin')} ${REVIVE_PRICE}</button>
+        <button class="btn white" data-act="bury">Begrav</button>
+        <button class="btn white" data-act="close">Stäng</button>
+      </div>`;
     $$('#card [data-act]').forEach(el => el.addEventListener('click', () => this.action(el.dataset.act)));
   },
 
@@ -284,6 +355,28 @@ const Home = {
     const n = a.needs;
     switch (act) {
       case 'close': Sound.click(); closeModal(); return;
+      case 'bury': Sound.click(); this.renderDeadCard(a, SPECIES[a.species], 'bury'); return;
+      case 'bury-no': Sound.click(); this.renderCard(); return;
+      case 'bury-yes':
+        Game.s.animals = Game.s.animals.filter(x => x !== a);
+        Game.save();
+        Sound.sad();
+        toast(`Hej då, ${a.name}. Vila i frid.`);
+        closeModal();
+        this.renderPets();
+        return;
+      case 'revive':
+        if (Game.s.coins < REVIVE_PRICE) { Sound.bad(); toast('Du har inte tillräckligt med mynt.', 'alert'); return; }
+        Game.s.coins -= REVIVE_PRICE;
+        a.dead = null;
+        a.needs = { food: 60, water: 60, joy: 60, clean: 60 };
+        updateHud();
+        Sound.win();
+        confetti();
+        toast(`Mirakel! ${a.name} lever igen!`, 'good');
+        Game.save();
+        this.joy(a, SPECIES[a.species].says);
+        return;
       case 'treat': Sound.click(); show('treat', a.id); return;
       case 'rename': this.rename(a); return;
       case 'food':
@@ -402,7 +495,7 @@ const Home = {
     const types = Object.keys(INJURIES);
     p.innerHTML = '<b style="width:100%">Test: skada första djuret</b>' +
       types.map(t => `<button data-t="${t}">${t}</button>`).join('') +
-      '<button data-x="wild">vild patient</button><button data-x="coins">+100 mynt</button><button data-x="low">behov låga</button>';
+      '<button data-x="wild">vild patient</button><button data-x="coins">+100 mynt</button><button data-x="low">behov låga</button><button data-x="die">dö</button>';
     p.addEventListener('click', e => {
       const b = e.target.closest('button');
       if (!b) return;
@@ -414,6 +507,7 @@ const Home = {
       }
       if (b.dataset.x === 'wild') { Game.s.wild = null; this.spawnWild(); }
       if (b.dataset.x === 'coins') { Game.addCoins(100); updateHud(); }
+      if (b.dataset.x === 'die' && a) this.die(a, 'svalt');
       if (b.dataset.x === 'low') Game.s.animals.forEach(x => Object.keys(x.needs).forEach(k => { x.needs[k] = 20; }));
     });
   },

@@ -83,21 +83,9 @@ const Game = {
   addCoins(n) {
     this.s.coins += n;
   },
-
-  // Räkna ut hur behoven har sjunkit medan spelet var stängt (snällt: aldrig under 15)
-  catchUp() {
-    const secs = Math.min((Date.now() - (this.s.lastSeen || Date.now())) / 1000, 3 * 3600);
-    if (secs < 5) return;
-    for (const a of this.s.animals) {
-      for (const k in NEED_RATES) {
-        const v = a.needs[k];
-        a.needs[k] = Math.max(Math.min(v, 15), v - NEED_RATES[k] * secs * 0.5);
-      }
-    }
-  },
 };
 
-// Hur mycket varje behov sjunker per sekund
+// Hur mycket varje behov sjunker per sekund (bara medan man spelar)
 const NEED_RATES = { food: 0.05, water: 0.07, joy: 0.035, clean: 0.025 };
 
 const NAMES = [

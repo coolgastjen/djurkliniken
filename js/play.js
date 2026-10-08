@@ -29,7 +29,7 @@ const Play = {
 
   enter(id) {
     this.a = Game.get(id);
-    if (!this.a || this.a.injury) { setTimeout(() => show('home'), 0); return; }
+    if (!this.a || this.a.injury || this.a.dead) { setTimeout(() => show('home'), 0); return; }
     $('#play-title').textContent = `Apport med ${this.a.name}`;
     this.count = 0;
     this.bonus = 0;

@@ -185,7 +185,6 @@ function setupStart() {
   $('#btn-continue').addEventListener('click', () => {
     Sound.click();
     if (!Game.load()) { Game.newGame(); }
-    Game.catchUp();
     Sound.enabled = Game.s.sound;
     show('home');
   });
@@ -277,7 +276,7 @@ const Adopt = {
 function mainLoop() {
   let saveCounter = 0;
   setInterval(() => {
-    if (!Game.s || currentScreen === 'start') return;
+    if (!Game.s || currentScreen === 'start' || document.hidden) return;
     Home.tick(1);
     Game.s.clock = (Game.s.clock || 0) + 1;
     applyTheme(false, true);

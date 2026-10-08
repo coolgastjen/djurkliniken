@@ -83,7 +83,7 @@ const Walk = {
 
   enter(id) {
     this.a = Game.get(id);
-    if (!this.a || this.a.injury) { setTimeout(() => show('home'), 0); return; }
+    if (!this.a || this.a.injury || this.a.dead) { setTimeout(() => show('home'), 0); return; }
     this.ride = this.a.species === 'hast';
     $('#walk-title').textContent = this.ride ? `Ridtur med ${this.a.name}` : `Promenad med ${this.a.name}`;
     $('#walk-ground').style.backgroundImage = svgUrl(this.ride ? this.art.rideGround : this.art.ground);

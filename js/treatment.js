@@ -35,7 +35,7 @@ const Treat = {
   enter(arg) {
     this.isWild = arg === 'wild';
     this.a = this.isWild ? Game.s.wild : Game.get(arg);
-    if (!this.a || !this.a.injury) { setTimeout(() => show('home'), 0); return; }
+    if (!this.a || !this.a.injury || this.a.dead) { setTimeout(() => show('home'), 0); return; }
     const sp = SPECIES[this.a.species];
     $('#treat-title').textContent = this.isWild ? `Vild patient: ${sp.name.toLowerCase()}` : `${this.a.name} hos veterinären`;
     this.finished = false;

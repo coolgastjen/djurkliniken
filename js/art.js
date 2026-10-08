@@ -413,6 +413,7 @@ const UI_ICONS = {
   paw: `<g transform="translate(32 38)" fill="currentColor"><ellipse rx="13" ry="11"/><circle cx="-16" cy="-15" r="6"/><circle cx="-6" cy="-24" r="6"/><circle cx="6" cy="-24" r="6"/><circle cx="16" cy="-15" r="6"/></g>`,
   door: `<rect x="14" y="6" width="36" height="52" rx="4" fill="#ffd8a8" ${S3}/><circle cx="42" cy="34" r="3" fill="${OUT}"/><path d="M24 18 h16 v4 h-16Z" fill="#e5484d"/>`,
   home: `<path d="M8 30 L32 10 L56 30 V54 H8Z" fill="#ffd8a8" ${S3}/><rect x="26" y="36" width="12" height="18" fill="#c97b3c" ${S3}/>`,
+  skull: `<path d="M12 30 a20 20 0 1 1 40 0 v8 q0 6 -6 6 h-2 v8 h-24 v-8 h-2 q-6 0 -6 -6Z" fill="#fff" ${S3}/><circle cx="24" cy="31" r="5" fill="${OUT}"/><circle cx="40" cy="31" r="5" fill="${OUT}"/><path d="M29 42 l3 -5 l3 5Z" fill="${OUT}"/><path d="M26 46 v6 M32 46 v6 M38 46 v6" stroke="${OUT}" stroke-width="2"/>`,
   scene: `<circle cx="24" cy="24" r="13" fill="#ffd43b" ${S3}/><path d="M50 38 A16 16 0 1 1 34 20 A12 12 0 0 0 50 38Z" fill="#4c6ef5" ${S3}/><circle cx="16" cy="50" r="2.5" fill="#74c0fc"/><circle cx="26" cy="56" r="2" fill="#74c0fc"/>`,
 };
 

@@ -39,6 +39,7 @@ const Sound = {
   pop() { this.tone(400, 0.08, 'sine', 0.1, 0, 900); },
   alert() { [880, 660, 880].forEach((f, i) => this.tone(f, 0.12, 'triangle', 0.1, i * 0.15)); },
   happy() { this.tone(500, 0.15, 'sine', 0.1, 0, 1000); this.tone(600, 0.15, 'sine', 0.1, 0.15, 1200); },
+  sad() { [523, 440, 349, 262].forEach((f, i) => this.tone(f, 0.35, 'triangle', 0.1, i * 0.28)); },
   thunder() {
     if (!this.enabled) return;
     const ctx = this.ensure();
