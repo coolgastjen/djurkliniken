@@ -106,7 +106,7 @@ const INJURIES = {
   },
 
   tagg: {
-    name: 'Tagg i tassen', species: ['hund', 'katt', 'kanin', 'marsvin', 'igelkott'], spots: ['legL', 'legR'],
+    name: 'Tagg i tassen', species: ['hund', 'katt', 'kanin', 'marsvin', 'igelkott', 'rav', 'ekorre', 'hamster'], spots: ['legL', 'legR'],
     problem: n => `${n} har trampat på en vass tagg som sitter fast i tassen.`,
     event: n => `Aj! ${n} har fått en tagg i tassen!`,
     steps: [
@@ -123,7 +123,7 @@ const INJURIES = {
   },
 
   benbrott: {
-    name: 'Benbrott', species: ['hund', 'katt', 'kanin', 'marsvin', 'hast'], spots: ['legL', 'legR'],
+    name: 'Benbrott', species: ['hund', 'katt', 'kanin', 'marsvin', 'hast', 'ko', 'gris', 'get', 'rav'], spots: ['legL', 'legR'],
     problem: n => `${n} haltar och har jätteont i benet. Det kanske är brutet?`,
     event: n => `Åh nej! ${n} hoppade snett och haltar. Benet kan vara brutet!`,
     steps: [
@@ -153,7 +153,7 @@ const INJURIES = {
   },
 
   loppor: {
-    name: 'Loppor', species: ['hund', 'katt', 'kanin', 'marsvin', 'igelkott'], spots: ['body'],
+    name: 'Loppor', species: ['hund', 'katt', 'kanin', 'marsvin', 'igelkott', 'rav', 'ekorre', 'hamster'], spots: ['body'],
     problem: n => `${n} kliar sig hela tiden. Det kryper små svarta prickar i pälsen!`,
     event: n => `${n} kliar och kliar sig... kan det vara loppor?`,
     steps: [
@@ -189,7 +189,7 @@ const INJURIES = {
   },
 
   fasting: {
-    name: 'Fästing', species: ['hund', 'katt', 'hast', 'igelkott'], spots: ['body', 'head'],
+    name: 'Fästing', species: ['hund', 'katt', 'hast', 'igelkott', 'ko', 'get', 'rav', 'ekorre'], spots: ['body', 'head'],
     problem: n => `${n} har en fästing som sitter fast och suger blod.`,
     event: n => `Usch! ${n} har fått en fästing!`,
     steps: [
@@ -201,28 +201,47 @@ const INJURIES = {
   },
 
   vinge: {
-    name: 'Skadad vinge', species: ['fagel'], spots: ['wing'],
+    name: 'Skadad vinge', species: ['fagel', 'anka'], spots: ['wing'],
     problem: n => `${n} har flugit in i ett fönster och kan inte lyfta vingen.`,
     event: n => `Åh nej! ${n} flög in i ett fönster och vingen hänger!`,
     steps: [
       { tool: 'forstoringsglas', action: 'hold', hint: 'Undersök vingen noga först, så ser du vad som har hänt.', done: 'Vingen är stukad, men inte bruten.' },
       { tool: 'bandage', action: 'rub', hint: 'Vingen måste lindas så att den hålls stilla.', done: 'Vingen är lindad.' },
-      { tool: 'filt', action: 'click', at: 'whole', hint: 'Nu behöver fågeln vila i värmen.', done: 'Lugn och ro, så läker vingen.' },
+      { tool: 'filt', action: 'click', at: 'whole', hint: 'Nu behöver djuret vila i värmen.', done: 'Lugn och ro, så läker vingen.' },
     ],
     mark: 'wing', markTime: 180,
+    draw: (x, y, step, c, sp) => {
+      const [px, py] = sp.wingPivot;
+      const g = inner => `<g transform="rotate(28 ${px} ${py})">${inner}</g>`;
+      if (step < 2) return g(at(x, y, `<path d="M-8 -6 l12 4 M-9 2 l14 3" stroke="#e5484d" stroke-width="3" stroke-linecap="round"/>`));
+      return g(at(x, y, `<rect x="-13" y="-16" width="26" height="30" rx="8" fill="#fff" ${SK2}/><path d="M-12 -6 L12 -9 M-12 2 L12 -1" stroke="#cfd8e3" stroke-width="2"/>`));
+    },
+  },
+
+  skal: {
+    name: 'Spricka i skalet', species: ['skoldpadda'], spots: ['body'],
+    problem: n => `${n} har ramlat ner från en sten och fått en spricka i skalet.`,
+    event: n => `Oj! ${n} har fått en spricka i skalet!`,
+    steps: [
+      { tool: 'forstoringsglas', action: 'hold', hint: 'Undersök sprickan noga först. Hur stor är den?', done: 'Sprickan är liten. Den går att laga!' },
+      { tool: 'desinfektion', action: 'click', hint: 'Gör rent i sprickan så att det inte kommer in bakterier.', done: 'Rent och fint.' },
+      { tool: 'bandage', action: 'rub', hint: 'Skalet måste hållas ihop medan det läker.', done: 'Skalet är lagat!' },
+    ],
+    mark: 'bandage', markTime: 200,
     draw: (x, y, step) => {
-      const g = inner => `<g transform="rotate(28 66 108)">${inner}</g>`;
-      if (step < 2) return g(at(52, 134, `<path d="M-8 -6 l12 4 M-9 2 l14 3" stroke="#e5484d" stroke-width="3" stroke-linecap="round"/>`));
-      return g(at(52, 134, `<rect x="-13" y="-16" width="26" height="30" rx="8" fill="#fff" ${SK2}/><path d="M-12 -6 L12 -9 M-12 2 L12 -1" stroke="#cfd8e3" stroke-width="2"/>`));
+      const crack = `<path d="M-14 -12 L-4 -4 L-8 4 L4 8 L0 16" fill="none" stroke="#3b2a20" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+      if (step === 0) return at(x, y, `<circle r="15" fill="#ff7a7a" opacity=".35"/>` + crack + painLines);
+      if (step === 1) return at(x, y, crack);
+      return at(x, y, `<circle r="13" fill="#ffd36b" opacity=".45"/>` + crack);
     },
   },
 
   hov: {
-    name: 'Sten i hoven', species: ['hast'], spots: ['hoof'],
+    name: 'Sten i hoven', species: ['hast', 'ko', 'get'], spots: ['hoof'],
     problem: n => `${n} haltar. En vass sten har fastnat under hoven.`,
     event: n => `${n} haltar plötsligt. Något har fastnat i hoven!`,
     steps: [
-      { tool: 'hovkratsa', action: 'pull', hint: 'Hästar har ett speciellt verktyg för att rensa hovar.', done: 'Stenen är borta!' },
+      { tool: 'hovkratsa', action: 'pull', hint: 'Det finns ett speciellt verktyg för att rensa hovar.', done: 'Stenen är borta!' },
       { tool: 'desinfektion', action: 'click', hint: 'Gör rent där stenen satt.', done: 'Rent!' },
       { tool: 'bandage', action: 'rub', hint: 'Skydda hoven medan den läker.', done: 'Hoven är skyddad!' },
     ],
@@ -253,7 +272,7 @@ function drawInjury(a, sp, c) {
   const def = INJURIES[inj.type];
   if (!def || inj.step >= def.steps.length) return '';
   const [x, y] = sp.spots[inj.spot] || sp.spots.body;
-  return def.draw(x, y, inj.step, c);
+  return def.draw(x, y, inj.step, c, sp);
 }
 
 function drawMark(mark, sp) {

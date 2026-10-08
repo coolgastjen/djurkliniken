@@ -15,7 +15,7 @@
   --radius: 18px;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-touch-callout: none; }
 
 html, body {
   margin: 0;
@@ -27,6 +27,8 @@ html, body {
   font-size: 18px;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 button { font: inherit; color: inherit; cursor: pointer; }
@@ -94,7 +96,7 @@ input { font: inherit; }
 .start-title { font-size: clamp(2.4rem, 9vw, 4.2rem); margin: 6px 0 0; font-weight: 700; color: var(--coral); text-shadow: 3px 3px 0 var(--ink); letter-spacing: 1px; }
 .start-sub { font-size: 1.15rem; color: var(--ink-soft); margin: 4px 0 18px; }
 .parade { display: flex; justify-content: center; gap: 0; margin: 0 auto 22px; max-width: 760px; width: 100%; }
-.parade > div { width: 14%; max-width: 110px; min-width: 0; animation: bob 2s ease-in-out infinite; }
+.parade > div { width: 12%; max-width: 110px; min-width: 0; animation: bob 2s ease-in-out infinite; }
 .parade > div:nth-child(2n) { animation-delay: -.6s; }
 .parade > div:nth-child(3n) { animation-delay: -1.2s; }
 .start-buttons { display: flex; flex-direction: column; gap: 14px; align-items: center; }

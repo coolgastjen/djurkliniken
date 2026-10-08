@@ -10,7 +10,8 @@ const NEED_INFO = {
 // Bestämd form, används som namn på vilda patienter
 const SPECIES_DEF = {
   hund: 'Hunden', katt: 'Katten', kanin: 'Kaninen', marsvin: 'Marsvinet',
-  hast: 'Hästen', fagel: 'Fågeln', igelkott: 'Igelkotten',
+  hast: 'Hästen', fagel: 'Fågeln', igelkott: 'Igelkotten', gris: 'Grisen', ko: 'Kon', get: 'Geten',
+  anka: 'Ankan', skoldpadda: 'Sköldpaddan', rav: 'Räven', ekorre: 'Ekorren', hamster: 'Hamstern',
 };
 
 const Home = {
@@ -119,7 +120,7 @@ const Home = {
   },
 
   spawnWild() {
-    const species = Math.random() < 0.6 ? pick(['igelkott', 'fagel']) : pick(SPECIES_ORDER);
+    const species = Math.random() < 0.6 ? pick(['igelkott', 'fagel', 'rav', 'ekorre', 'anka', 'skoldpadda']) : pick(SPECIES_ORDER);
     const color = Math.floor(Math.random() * SPECIES[species].colors.length);
     Game.s.wild = {
       id: -1, wild: true, species, color, name: SPECIES_DEF[species],

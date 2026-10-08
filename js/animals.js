@@ -230,7 +230,8 @@ const SPECIES = {
       { name: 'Röd', main: '#ef6b5a', light: '#ffd3a8', dark: '#a83a30', belly: '#f6957f', cheek: '#ffd84d' },
     ],
     eyes: [82, 118, 86], eyeR: 7, cheeks: [70, 130, 108], mouth: null,
-    spots: { head: [100, 66], eye: [118, 86], legL: [86, 180], legR: [114, 180], body: [100, 146], mouth: [100, 108], wing: [48, 132] },
+    spots: { head: [100, 66], eye: [118, 86], legL: [86, 180], legR: [114, 180], body: [100, 146], mouth: [100, 108], wing: [52, 134] },
+    wingPivot: [66, 108],
     hat: [100, 60, 0.85], neck: [100, 126, 0.9],
     draw(c, mood, u, a) {
       const hurtWing = a && a.injury && a.injury.type === 'vinge';
@@ -288,9 +289,242 @@ const SPECIES = {
       <circle cx="98" cy="145" r="2" fill="#fff" opacity=".7"/>`;
     },
   },
+
+  gris: {
+    name: 'Gris', says: 'Nöff nöff!',
+    colors: [
+      { name: 'Rosa', main: '#f7b2bf', light: '#fcd6dd', dark: '#e0879a' },
+      { name: 'Fläckig', main: '#f7b2bf', light: '#fcd6dd', dark: '#e0879a', spots: '#4a444f' },
+      { name: 'Brun', main: '#c8875f', light: '#ebc3a5', dark: '#8a5434' },
+      { name: 'Svart', main: '#4a444f', light: '#7a7280', dark: '#2a262e' },
+    ],
+    eyes: [82, 118, 80], eyeR: 7.5, cheeks: [66, 134, 96], mouth: [100, 123, 7],
+    spots: { head: [100, 54], eye: [118, 80], legL: [80, 184], legR: [120, 184], body: [70, 150], mouth: [100, 124] },
+    hat: [100, 48, 0.95], neck: [100, 130, 1],
+    draw(c) {
+      return `
+      <g class="tail" style="transform-origin:140px 148px"><path d="M140 148 q16 -4 12 -16 q-4 -8 -10 -2 q-4 8 8 9" fill="none" stroke="${OUT}" stroke-width="8" stroke-linecap="round"/><path d="M140 148 q16 -4 12 -16 q-4 -8 -10 -2 q-4 8 8 9" fill="none" stroke="${c.main}" stroke-width="4" stroke-linecap="round"/></g>
+      <ellipse cx="100" cy="148" rx="48" ry="38" fill="${c.main}" ${SK}/>
+      <ellipse cx="100" cy="157" rx="28" ry="22" fill="${c.light}"/>
+      ${c.spots ? `<ellipse cx="72" cy="140" rx="13" ry="10" fill="${c.spots}"/><ellipse cx="132" cy="160" rx="8" ry="7" fill="${c.spots}"/>` : ''}
+      <ellipse cx="80" cy="184" rx="12" ry="8" fill="${c.dark}" ${SK}/><ellipse cx="120" cy="184" rx="12" ry="8" fill="${c.dark}" ${SK}/>
+      <path d="M80 179 v9 M120 179 v9" stroke="${OUT}" stroke-width="2"/>
+      <g class="ears">
+        <path d="M64 60 L56 26 L92 48 Z" fill="${c.main}" ${SK}/><path d="M66 52 L62 34 L82 48 Z" fill="${c.dark}"/>
+        <path d="M136 60 L144 26 L108 48 Z" fill="${c.main}" ${SK}/><path d="M134 52 L138 34 L118 48 Z" fill="${c.dark}"/>
+      </g>
+      <circle cx="100" cy="88" r="42" fill="${c.main}" ${SK}/>
+      ${c.spots ? `<ellipse cx="121" cy="66" rx="12" ry="10" fill="${c.spots}"/>` : ''}
+      <ellipse cx="100" cy="104" rx="21" ry="14" fill="${c.light}" ${SK}/>
+      <ellipse cx="93" cy="104" rx="3.5" ry="5" fill="${c.dark}"/><ellipse cx="107" cy="104" rx="3.5" ry="5" fill="${c.dark}"/>`;
+    },
+  },
+
+  ko: {
+    name: 'Ko', says: 'Muuu!',
+    colors: [
+      { name: 'Svartvit', main: '#fbf8f3', light: '#f7c1c8', dark: '#3b3540', patch: '#3b3540' },
+      { name: 'Brunvit', main: '#fbf8f3', light: '#f7c1c8', dark: '#3b3540', patch: '#9b5a32' },
+      { name: 'Brun', main: '#b5733f', light: '#ebc3a5', dark: '#3b3540' },
+      { name: 'Svart', main: '#3e3a42', light: '#8a7f86', dark: '#1f1c20' },
+    ],
+    eyes: [84, 116, 72], eyeR: 7, cheeks: [70, 130, 90], mouth: [100, 116, 6],
+    spots: { head: [100, 46], eye: [116, 72], legL: [82, 170], legR: [118, 170], body: [140, 140], mouth: [100, 117], hoof: [82, 186] },
+    hat: [100, 40, 0.85], neck: [100, 128, 0.9],
+    draw(c, mood, u) {
+      return `
+      <defs><clipPath id="${u}b"><ellipse cx="100" cy="146" rx="50" ry="34"/></clipPath><clipPath id="${u}h"><ellipse cx="100" cy="76" rx="36" ry="38"/></clipPath></defs>
+      <g class="tail" style="transform-origin:142px 140px"><path d="M142 140 Q166 150 160 176" fill="none" stroke="${OUT}" stroke-width="9" stroke-linecap="round"/><path d="M142 140 Q166 150 160 176" fill="none" stroke="${c.main}" stroke-width="4" stroke-linecap="round"/><ellipse cx="160" cy="180" rx="6" ry="8" fill="${c.dark}"/></g>
+      <ellipse cx="100" cy="146" rx="50" ry="34" fill="${c.main}"/>
+      ${c.patch ? `<g clip-path="url(#${u}b)"><ellipse cx="68" cy="134" rx="20" ry="15" fill="${c.patch}"/><ellipse cx="132" cy="160" rx="18" ry="13" fill="${c.patch}"/></g>` : ''}
+      <ellipse cx="100" cy="146" rx="50" ry="34" fill="none" ${SK}/>
+      <rect x="74" y="156" width="16" height="28" rx="6" fill="${c.main}" ${SK}/><rect x="110" y="156" width="16" height="28" rx="6" fill="${c.main}" ${SK}/>
+      <rect x="72" y="180" width="20" height="10" rx="3" fill="${c.dark}" ${SK}/><rect x="108" y="180" width="20" height="10" rx="3" fill="${c.dark}" ${SK}/>
+      <path d="M70 50 Q54 42 58 24 Q68 38 80 44 Z" fill="#f3e3c3" ${SK}/><path d="M130 50 Q146 42 142 24 Q132 38 120 44 Z" fill="#f3e3c3" ${SK}/>
+      <g class="ears">
+        <ellipse cx="54" cy="66" rx="17" ry="9" transform="rotate(-15 54 66)" fill="${c.main}" ${SK}/><ellipse cx="54" cy="66" rx="9" ry="4" transform="rotate(-15 54 66)" fill="#f7c1c8"/>
+        <ellipse cx="146" cy="66" rx="17" ry="9" transform="rotate(15 146 66)" fill="${c.main}" ${SK}/><ellipse cx="146" cy="66" rx="9" ry="4" transform="rotate(15 146 66)" fill="#f7c1c8"/>
+      </g>
+      <ellipse cx="100" cy="76" rx="36" ry="38" fill="${c.main}"/>
+      ${c.patch ? `<ellipse cx="120" cy="62" rx="15" ry="17" fill="${c.patch}" clip-path="url(#${u}h)"/>` : ''}
+      <ellipse cx="100" cy="76" rx="36" ry="38" fill="none" ${SK}/>
+      <ellipse cx="100" cy="106" rx="30" ry="18" fill="${c.light}" ${SK}/>
+      <ellipse cx="89" cy="103" rx="4" ry="3" fill="#b8606e"/><ellipse cx="111" cy="103" rx="4" ry="3" fill="#b8606e"/>`;
+    },
+  },
+
+  get: {
+    name: 'Get', says: 'Bä-ä-ä!',
+    colors: [
+      { name: 'Vit', main: '#f6f2ec', light: '#ffffff', dark: '#5a4e48' },
+      { name: 'Brun', main: '#a8774f', light: '#e3c8ae', dark: '#3b3540' },
+      { name: 'Svart', main: '#3e3a42', light: '#f1ebe4', dark: '#1f1c20' },
+      { name: 'Grå', main: '#a7a2a0', light: '#e9e5e2', dark: '#4a4448' },
+    ],
+    eyes: [86, 114, 68], eyeR: 6.5, cheeks: [74, 126, 86], mouth: [100, 104, 5],
+    spots: { head: [100, 44], eye: [114, 68], legL: [84, 170], legR: [116, 170], body: [136, 142], mouth: [100, 105], hoof: [84, 185] },
+    hat: [100, 40, 0.8], neck: [100, 120, 0.8],
+    draw(c) {
+      return `
+      <g class="tail" style="transform-origin:140px 134px"><path d="M138 134 L148 116 L152 130 Z" fill="${c.main}" ${SK}/></g>
+      <ellipse cx="100" cy="146" rx="44" ry="30" fill="${c.main}" ${SK}/>
+      <rect x="78" y="154" width="13" height="30" rx="5" fill="${c.main}" ${SK}/><rect x="109" y="154" width="13" height="30" rx="5" fill="${c.main}" ${SK}/>
+      <rect x="76" y="180" width="17" height="9" rx="3" fill="${c.dark}" ${SK}/><rect x="107" y="180" width="17" height="9" rx="3" fill="${c.dark}" ${SK}/>
+      <path d="M82 44 Q70 22 86 10 Q82 26 92 40 Z" fill="#cdbfa8" ${SK}/><path d="M118 44 Q130 22 114 10 Q118 26 108 40 Z" fill="#cdbfa8" ${SK}/>
+      <g class="ears">
+        <ellipse cx="62" cy="66" rx="17" ry="7" transform="rotate(20 62 66)" fill="${c.main}" ${SK}/>
+        <ellipse cx="138" cy="66" rx="17" ry="7" transform="rotate(-20 138 66)" fill="${c.main}" ${SK}/>
+      </g>
+      <ellipse cx="100" cy="72" rx="30" ry="34" fill="${c.main}" ${SK}/>
+      <ellipse cx="100" cy="98" rx="20" ry="14" fill="${c.light}" ${SK}/>
+      <ellipse cx="94" cy="95" rx="2.5" ry="2" fill="${OUT}"/><ellipse cx="106" cy="95" rx="2.5" ry="2" fill="${OUT}"/>
+      <path d="M92 110 Q100 134 108 110 Z" fill="${c.light}" ${SK}/>`;
+    },
+  },
+
+  anka: {
+    name: 'Anka', says: 'Kvack kvack!',
+    colors: [
+      { name: 'Gul', main: '#ffd84d', light: '#fff3b0', dark: '#e6b52e', tuft: true },
+      { name: 'Vit', main: '#fbf8f3', light: '#ffffff', dark: '#e2d9cc' },
+      { name: 'Gräsand', main: '#a8845e', light: '#e6d3b8', dark: '#6e5238', head: '#2f8a4a' },
+      { name: 'Brun', main: '#b88a5a', light: '#ecd6b6', dark: '#7d5a36' },
+    ],
+    eyes: [86, 114, 72], eyeR: 6.5, cheeks: [74, 126, 88], mouth: null,
+    spots: { head: [100, 52], eye: [114, 72], legL: [82, 188], legR: [118, 188], body: [100, 152], mouth: [100, 104], wing: [54, 146] },
+    wingPivot: [68, 124],
+    hat: [100, 46, 0.85], neck: [100, 118, 0.9],
+    draw(c, mood, u, a) {
+      const hurtWing = a && a.injury && a.injury.type === 'vinge';
+      return `
+      <ellipse cx="82" cy="188" rx="15" ry="6" fill="#f59f00" ${SK}/><ellipse cx="118" cy="188" rx="15" ry="6" fill="#f59f00" ${SK}/>
+      <ellipse cx="100" cy="142" rx="50" ry="44" fill="${c.main}" ${SK}/>
+      <ellipse cx="100" cy="154" rx="28" ry="24" fill="${c.light}"/>
+      <g class="wingL" style="transform-origin:68px 124px${hurtWing ? ';transform:rotate(28deg)' : ''}"><path d="M60 120 Q38 150 58 176 Q74 164 72 128 Z" fill="${c.dark}" ${SK}/></g>
+      <g class="wingR" style="transform-origin:132px 124px"><path d="M140 120 Q162 150 142 176 Q126 164 128 128 Z" fill="${c.dark}" ${SK}/></g>
+      <circle cx="100" cy="78" r="36" fill="${c.head || c.main}" ${SK}/>
+      ${c.head ? `<path d="M70 108 Q100 120 130 108" fill="none" stroke="#fff" stroke-width="5"/>` : ''}
+      ${c.tuft ? `<path d="M98 44 q-8 -12 4 -16 q-4 7 2 14" fill="${c.main}" ${SK}/>` : ''}
+      <path d="M77 98 Q100 87 123 98 Q125 111 100 113 Q75 111 77 98 Z" fill="#f59f00" ${SK}/>
+      <path d="M82 102 Q100 107 118 102" fill="none" stroke="${OUT}" stroke-width="2"/>
+      <circle cx="93" cy="96" r="1.6" fill="${OUT}"/><circle cx="107" cy="96" r="1.6" fill="${OUT}"/>`;
+    },
+  },
+
+  skoldpadda: {
+    name: 'Sköldpadda', says: '*mums*',
+    colors: [
+      { name: 'Grön', main: '#9ccf6a', light: '#f2df9a', dark: '#5e7f33', patch: '#86a744' },
+      { name: 'Brun', main: '#c2b77a', light: '#f2df9a', dark: '#8a5a32', patch: '#a8744a' },
+      { name: 'Havsblå', main: '#8fd0c4', light: '#f2e6b8', dark: '#3f7f86', patch: '#5aa3a8' },
+    ],
+    eyes: [88, 112, 112], eyeR: 6, cheeks: [78, 122, 126], mouth: [100, 135, 6],
+    spots: { head: [100, 94], eye: [112, 112], legL: [44, 172], legR: [156, 172], body: [140, 100], mouth: [100, 137] },
+    hat: [100, 88, 0.8], neck: [100, 150, 0.8],
+    draw(c) {
+      return `
+      <path d="M30 160 Q30 68 100 64 Q170 68 170 160 Z" fill="${c.dark}" ${SK}/>
+      <path d="M88 82 L112 82 L122 104 L112 126 L88 126 L78 104 Z" fill="${c.patch}" ${SK2}/>
+      <path d="M48 128 L68 108 L74 140 L54 152 Z M152 128 L132 108 L126 140 L146 152 Z M62 92 L80 76 L74 100 Z M138 92 L120 76 L126 100 Z" fill="${c.patch}" ${SK2}/>
+      <ellipse cx="44" cy="172" rx="17" ry="12" fill="${c.main}" ${SK}/><ellipse cx="156" cy="172" rx="17" ry="12" fill="${c.main}" ${SK}/>
+      <path d="M36 180 v4 M44 182 v4 M52 180 v4 M148 180 v4 M156 182 v4 M164 180 v4" stroke="${OUT}" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="100" cy="166" rx="54" ry="18" fill="${c.light}" ${SK}/>
+      <path d="M70 160 h60 M76 172 h48" stroke="#d9c27a" stroke-width="2.5"/>
+      <circle cx="100" cy="120" r="32" fill="${c.main}" ${SK}/>
+      <circle cx="96" cy="126" r="1.5" fill="${OUT}"/><circle cx="104" cy="126" r="1.5" fill="${OUT}"/>`;
+    },
+  },
+
+  rav: {
+    name: 'Räv', says: 'Yip yip!',
+    colors: [
+      { name: 'Röd', main: '#f08a3c', light: '#fff4e6', dark: '#4a3a33' },
+      { name: 'Silver', main: '#8f96a3', light: '#f4f5f7', dark: '#3b3540' },
+      { name: 'Fjällräv', main: '#f6f4f0', light: '#ffffff', dark: '#c9c2b8' },
+      { name: 'Brun', main: '#b4683a', light: '#f6e2cc', dark: '#3b2e2a' },
+    ],
+    eyes: [80, 120, 80], eyeR: 7.5, cheeks: [68, 132, 100], mouth: [100, 108, 7],
+    spots: { head: [100, 56], eye: [120, 80], legL: [84, 183], legR: [116, 183], body: [70, 152], mouth: [100, 110] },
+    hat: [100, 48, 0.95], neck: [100, 126, 0.9],
+    draw(c) {
+      return `
+      <g class="tail" style="transform-origin:134px 156px">
+        <path d="M134 162 Q192 154 180 100 Q174 84 160 92 Q168 124 132 142 Z" fill="${c.main}" ${SK}/>
+        <path d="M180 100 Q174 84 160 92 Q162 104 168 110 Q176 108 180 100 Z" fill="${c.light}" ${SK2}/>
+      </g>
+      <ellipse cx="100" cy="150" rx="40" ry="34" fill="${c.main}" ${SK}/>
+      <ellipse cx="100" cy="157" rx="22" ry="24" fill="${c.light}"/>
+      ${paw(84, 183, 12, 9, c.dark)}${paw(116, 183, 12, 9, c.dark)}
+      <g class="ears">
+        <path d="M58 68 L60 18 L96 50 Z" fill="${c.main}" ${SK}/><path d="M65 58 L66 32 L85 50 Z" fill="${c.dark}"/>
+        <path d="M142 68 L140 18 L104 50 Z" fill="${c.main}" ${SK}/><path d="M135 58 L134 32 L115 50 Z" fill="${c.dark}"/>
+      </g>
+      <ellipse cx="100" cy="84" rx="46" ry="38" fill="${c.main}" ${SK}/>
+      <path d="M56 92 Q76 82 100 96 Q124 82 144 92 Q130 120 100 120 Q70 120 56 92 Z" fill="${c.light}"/>
+      <ellipse cx="100" cy="100" rx="6.5" ry="4.5" fill="#2b2024"/>`;
+    },
+  },
+
+  ekorre: {
+    name: 'Ekorre', says: 'Tjick tjick!',
+    colors: [
+      { name: 'Röd', main: '#c8662f', light: '#f6dcc0', dark: '#8a4220' },
+      { name: 'Grå', main: '#8d8f99', light: '#ecebef', dark: '#5a5c66' },
+      { name: 'Brun', main: '#8b5a3c', light: '#ead2bb', dark: '#5a3824' },
+      { name: 'Svart', main: '#3e3a42', light: '#a39aa3', dark: '#1f1c20' },
+    ],
+    eyes: [86, 114, 90], eyeR: 7, cheeks: [76, 124, 104], mouth: [100, 112, 5],
+    spots: { head: [100, 66], eye: [114, 90], legL: [84, 184], legR: [116, 184], body: [74, 158], mouth: [100, 113] },
+    hat: [100, 62, 0.8], neck: [100, 128, 0.8],
+    draw(c) {
+      return `
+      <g class="tail" style="transform-origin:128px 160px">
+        <path d="M126 170 Q188 168 182 110 Q178 58 140 46 Q118 42 122 64 Q150 68 156 102 Q160 142 120 150 Z" fill="${c.main}" ${SK}/>
+        <path d="M134 60 Q164 72 168 108 M148 152 Q172 136 172 112" fill="none" stroke="${c.dark}" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+      </g>
+      <ellipse cx="100" cy="152" rx="34" ry="32" fill="${c.main}" ${SK}/>
+      <ellipse cx="100" cy="159" rx="20" ry="22" fill="${c.light}"/>
+      ${paw(84, 184, 12, 7, c.main)}${paw(116, 184, 12, 7, c.main)}
+      <ellipse cx="100" cy="142" rx="7" ry="8" fill="#b07a45" ${SK2}/><path d="M92 137 Q100 128 108 137 Z" fill="#6e4a2a" ${SK2}/>
+      <ellipse cx="89" cy="140" rx="7" ry="8" fill="${c.main}" ${SK2}/><ellipse cx="111" cy="140" rx="7" ry="8" fill="${c.main}" ${SK2}/>
+      <g class="ears">
+        <path d="M70 70 L72 36 L92 58 Z" fill="${c.main}" ${SK}/><path d="M72 36 l-5 -9 M72 36 l1 -10 M72 36 l6 -7" stroke="${c.dark}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M130 70 L128 36 L108 58 Z" fill="${c.main}" ${SK}/><path d="M128 36 l5 -9 M128 36 l-1 -10 M128 36 l-6 -7" stroke="${c.dark}" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      <circle cx="100" cy="94" r="34" fill="${c.main}" ${SK}/>
+      <ellipse cx="100" cy="108" rx="16" ry="12" fill="${c.light}"/>
+      <ellipse cx="100" cy="103" rx="4.5" ry="3.5" fill="#2b2024"/>`;
+    },
+  },
+
+  hamster: {
+    name: 'Hamster', says: 'Pip!',
+    colors: [
+      { name: 'Guld', main: '#e9a65a', light: '#fff3e0', dark: '#b8722f' },
+      { name: 'Vit', main: '#f8f4ee', light: '#ffffff', dark: '#d8ccbf' },
+      { name: 'Grå', main: '#a8a3a6', light: '#f1eef0', dark: '#77727a' },
+      { name: 'Panda', main: '#3f3a3f', light: '#fbf6ef', dark: '#1f1c20' },
+    ],
+    eyes: [82, 118, 92], eyeR: 7, cheeks: [66, 134, 112], mouth: [100, 114, 5],
+    spots: { head: [100, 66], eye: [118, 92], legL: [80, 186], legR: [120, 186], body: [150, 150], mouth: [100, 115] },
+    hat: [100, 60, 0.85], neck: [100, 134, 0.9],
+    draw(c) {
+      return `
+      <ellipse cx="100" cy="146" rx="56" ry="44" fill="${c.main}" ${SK}/>
+      <ellipse cx="100" cy="158" rx="34" ry="27" fill="${c.light}"/>
+      <ellipse cx="80" cy="187" rx="10" ry="5" fill="#f6a9b8" ${SK2}/><ellipse cx="120" cy="187" rx="10" ry="5" fill="#f6a9b8" ${SK2}/>
+      <ellipse cx="88" cy="142" rx="6" ry="5" fill="#f6a9b8" ${SK2}/><ellipse cx="112" cy="142" rx="6" ry="5" fill="#f6a9b8" ${SK2}/>
+      <circle cx="66" cy="64" r="12" fill="${c.main}" ${SK}/><circle cx="66" cy="64" r="6" fill="#f6a9b8"/>
+      <circle cx="134" cy="64" r="12" fill="${c.main}" ${SK}/><circle cx="134" cy="64" r="6" fill="#f6a9b8"/>
+      <ellipse cx="100" cy="96" rx="44" ry="38" fill="${c.main}" ${SK}/>
+      <ellipse cx="72" cy="110" rx="18" ry="14" fill="${c.light}"/><ellipse cx="128" cy="110" rx="18" ry="14" fill="${c.light}"/>
+      <ellipse cx="100" cy="109" rx="12" ry="9" fill="${c.light}"/>
+      <ellipse cx="100" cy="104" rx="4" ry="3" fill="#e57d97"/>`;
+    },
+  },
 };
 
-const SPECIES_ORDER = ['hund', 'katt', 'kanin', 'marsvin', 'hast', 'fagel', 'igelkott'];
+const SPECIES_ORDER = ['hund', 'katt', 'kanin', 'marsvin', 'hamster', 'hast', 'ko', 'gris', 'get', 'fagel', 'anka', 'skoldpadda', 'igelkott', 'rav', 'ekorre'];
 
 // ---------- Tillbehör (ritas runt punkten 0,0) ----------
 

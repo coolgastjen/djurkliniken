@@ -162,12 +162,14 @@ const TOOL_ICONS = {
 
 const FOODS = {
   hundgodis: { name: 'Hundgodis', likes: ['hund'] },
-  kattmat: { name: 'Kattmat', likes: ['katt', 'igelkott'] },
-  morot: { name: 'Morot', likes: ['kanin', 'marsvin', 'hast'] },
-  ho: { name: 'Hö', likes: ['kanin', 'marsvin', 'hast'] },
-  apple: { name: 'Äpple', likes: ['hast', 'marsvin', 'fagel'] },
-  fron: { name: 'Frön', likes: ['fagel'] },
-  mask: { name: 'Mjölmask', likes: ['igelkott', 'fagel'] },
+  kattmat: { name: 'Kattmat', likes: ['katt', 'igelkott', 'rav'] },
+  morot: { name: 'Morot', likes: ['kanin', 'marsvin', 'hast', 'gris', 'get', 'hamster'] },
+  ho: { name: 'Hö', likes: ['kanin', 'marsvin', 'hast', 'ko', 'get'] },
+  apple: { name: 'Äpple', likes: ['hast', 'marsvin', 'fagel', 'gris', 'get', 'ekorre'] },
+  fron: { name: 'Frön', likes: ['fagel', 'anka', 'hamster'] },
+  mask: { name: 'Mjölmask', likes: ['igelkott', 'fagel', 'anka', 'skoldpadda'] },
+  notter: { name: 'Nötter', likes: ['ekorre', 'hamster'] },
+  sallad: { name: 'Sallad', likes: ['skoldpadda', 'kanin', 'marsvin', 'anka'] },
 };
 const FOOD_PRICE = 6;  // för 3 st
 
@@ -183,6 +185,11 @@ const FOOD_ICONS = {
   fron: `<ellipse cx="32" cy="46" rx="26" ry="10" fill="#74c0fc" ${S3}/>${outlined(`<ellipse cx="22" cy="38" rx="5" ry="3.5"/><ellipse cx="32" cy="34" rx="5" ry="3.5"/><ellipse cx="42" cy="38" rx="5" ry="3.5"/><ellipse cx="27" cy="28" rx="5" ry="3.5"/><ellipse cx="37" cy="27" rx="5" ry="3.5"/><ellipse cx="32" cy="21" rx="5" ry="3.5"/>`, '#e9c46a', 4)}`,
   mask: `${strokeOut('M10 42 Q18 26 28 38 T48 34 Q54 32 56 26', '#e0b77a', 10)}<path d="M18 33 l3 6 M27 37 l-1 7 M37 38 l-1 7 M46 33 l2 6" stroke="#b8894a" stroke-width="2"/><circle cx="55" cy="25" r="1.8" fill="#2b2024"/>`,
 };
+
+FOOD_ICONS.notter = `<path d="M18 30 Q18 54 26 56 Q34 54 34 30 Z" fill="#c98b4a" ${S3}/><path d="M14 30 Q26 16 38 30 Z" fill="#7a4a22" ${S3}/><path d="M26 22 V16" ${S3}/>
+  <path d="M36 36 Q36 58 44 58 Q52 58 52 36 Z" fill="#d9a066" ${S3}/><path d="M32 36 Q44 22 56 36 Z" fill="#8a5a2c" ${S3}/><path d="M44 28 V22" ${S3}/>`;
+FOOD_ICONS.sallad = `<path d="M32 56 Q8 52 8 32 Q8 16 20 14 Q24 6 32 8 Q40 6 44 14 Q56 16 56 32 Q56 52 32 56Z" fill="#8ce99a" ${S3}/>
+  <path d="M32 54 Q30 36 32 16 M32 40 Q22 34 16 26 M32 34 Q42 28 48 22 M32 48 Q42 44 50 38" fill="none" stroke="#2f9e44" stroke-width="2.5" stroke-linecap="round"/>`;
 
 const UI_ICONS = {
   coin: `<circle cx="32" cy="32" r="24" fill="#ffd43b" ${S3}/><circle cx="32" cy="32" r="17" fill="none" stroke="#f0b400" stroke-width="3"/><g transform="translate(32 34) scale(.55)" fill="#f0b400"><ellipse rx="16" ry="13"/><circle cx="-20" cy="-18" r="7"/><circle cx="-7" cy="-28" r="7"/><circle cx="7" cy="-28" r="7"/><circle cx="20" cy="-18" r="7"/></g>`,

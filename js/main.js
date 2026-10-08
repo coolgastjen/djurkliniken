@@ -83,7 +83,7 @@ function fillIcons() {
 // ---------- Startskärm ----------
 
 function setupStart() {
-  $('#parade').innerHTML = SPECIES_ORDER.map((sp, i) =>
+  $('#parade').innerHTML = ['hund', 'katt', 'kanin', 'hast', 'gris', 'anka', 'rav', 'igelkott'].map((sp, i) =>
     `<div>${drawAnimal({ id: i + 1, species: sp, color: i % SPECIES[sp].colors.length }, { mood: 'happy' })}</div>`).join('');
   if (Game.hasSave()) $('#btn-continue').classList.remove('hidden');
 
@@ -191,6 +191,13 @@ function mainLoop() {
 }
 
 // ---------- Start ----------
+
+// Stoppa zoom i mobilen (nyp-zoom på iPhone/iPad och zoom med ctrl+hjul)
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+document.addEventListener('dblclick', e => e.preventDefault());
+document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
 
 window.addEventListener('DOMContentLoaded', () => {
   fillIcons();

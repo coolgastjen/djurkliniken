@@ -2,7 +2,10 @@
 
 const FETCH_ROUNDS = 5;
 // Hur snabbt varje djur springer (andel av spelplanens bredd per sekund)
-const RUN_SPEED = { hund: 0.55, katt: 0.45, kanin: 0.5, marsvin: 0.32, hast: 0.62, fagel: 0.5, igelkott: 0.3 };
+const RUN_SPEED = {
+  hund: 0.55, katt: 0.45, kanin: 0.5, marsvin: 0.32, hast: 0.62, fagel: 0.5, igelkott: 0.3,
+  gris: 0.4, ko: 0.38, get: 0.52, anka: 0.36, skoldpadda: 0.16, rav: 0.6, ekorre: 0.56, hamster: 0.3,
+};
 
 const Play = {
   a: null,
@@ -113,7 +116,7 @@ const Play = {
     const dy = (target.y - this.pet.y) * r.height;
     const d = Math.hypot(dx, dy);
     const sc = 0.55 + 0.45 * this.pet.y;  // längre bort = ser långsammare ut
-    const stepPx = RUN_SPEED[this.a.species] * r.width * dt * sc;
+    const stepPx = (RUN_SPEED[this.a.species] || 0.45) * r.width * dt * sc;
     if (d <= stepPx) { this.pet.x = target.x; this.pet.y = target.y; return true; }
     this.pet.x += dx / d * stepPx / r.width;
     this.pet.y += dy / d * stepPx / r.height;
