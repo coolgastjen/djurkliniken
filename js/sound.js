@@ -39,6 +39,22 @@ const Sound = {
   pop() { this.tone(400, 0.08, 'sine', 0.1, 0, 900); },
   alert() { [880, 660, 880].forEach((f, i) => this.tone(f, 0.12, 'triangle', 0.1, i * 0.15)); },
   happy() { this.tone(500, 0.15, 'sine', 0.1, 0, 1000); this.tone(600, 0.15, 'sine', 0.1, 0.15, 1200); },
+  howl() { this.tone(300, 0.5, 'sine', 0.12, 0, 620); this.tone(620, 1.1, 'sine', 0.12, 0.5, 380); },
+  bang() {
+    if (!this.enabled) return;
+    const ctx = this.ensure();
+    if (!ctx) return;
+    const len = Math.floor(ctx.sampleRate * 0.25);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const g = ctx.createGain();
+    g.gain.value = 0.35;
+    src.connect(g).connect(ctx.destination);
+    src.start();
+  },
   siren() { [660, 880, 660, 880, 660, 880].forEach((f, i) => this.tone(f, 0.22, 'square', 0.05, i * 0.24)); },
   sad() { [523, 440, 349, 262].forEach((f, i) => this.tone(f, 0.35, 'triangle', 0.1, i * 0.28)); },
   thunder() {

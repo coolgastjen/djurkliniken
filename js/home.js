@@ -37,6 +37,7 @@ const Home = {
     this.renderPets(true);
     this.renderWild();
     this.renderAkut(true);
+    Wolf.renderGuard();
   },
 
   // ---------- Djuren i trädgården ----------
@@ -251,6 +252,7 @@ const Home = {
     }
 
     if (currentScreen !== 'home') return;
+    Wolf.maybeSpawn(dt);
     s.timers.akut = (s.timers.akut === undefined ? 90 : s.timers.akut) - dt;
     if (s.timers.akut <= 0) {
       s.timers.akut = 160 + Math.random() * 140;
@@ -389,7 +391,7 @@ const Home = {
   },
 
   renderDeadCard(a, sp, confirmBury) {
-    const cause = { svalt: 'svalt ihjäl', torst: 'dog av törst', skada: 'dog av sin skada' }[a.dead.cause] || 'har dött';
+    const cause = { svalt: 'svalt ihjäl', torst: 'dog av törst', skada: 'dog av sin skada', varg: 'blev tagen av vargen' }[a.dead.cause] || 'har dött';
     $('#card').innerHTML = `
       <div class="card-head">
         <div class="card-portrait">${drawAnimal(a)}</div>
@@ -615,7 +617,7 @@ const Home = {
     const types = Object.keys(INJURIES);
     p.innerHTML = '<b style="width:100%">Test: skada första djuret</b>' +
       types.map(t => `<button data-t="${t}">${t}</button>`).join('') +
-      '<button data-x="wild">vild patient</button><button data-x="coins">+100 mynt</button><button data-x="low">behov låga</button><button data-x="die">dö</button><button data-x="dieall">döda alla</button><button data-x="akut">akutfall</button>';
+      '<button data-x="wild">vild patient</button><button data-x="coins">+100 mynt</button><button data-x="low">behov låga</button><button data-x="die">dö</button><button data-x="dieall">döda alla</button><button data-x="akut">akutfall</button><button data-x="wolf">varg</button>';
     p.addEventListener('click', e => {
       const b = e.target.closest('button');
       if (!b) return;
@@ -627,6 +629,7 @@ const Home = {
       }
       if (b.dataset.x === 'wild') { Game.s.wild = null; this.spawnWild(); }
       if (b.dataset.x === 'akut') { Game.s.akut = null; this.spawnAkut(); }
+      if (b.dataset.x === 'wolf') { if (Wolf.w) Wolf.end(); Wolf.start(); }
       if (b.dataset.x === 'coins') { Game.addCoins(100); updateHud(); }
       if (b.dataset.x === 'die' && a) this.die(a, 'svalt');
       if (b.dataset.x === 'dieall') Game.s.animals.filter(x => !x.dead).forEach(x => this.die(x, 'svalt'));

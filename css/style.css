@@ -511,3 +511,26 @@ body[data-scene="natt"] #garden-animals, body[data-scene="natt"] .play-pet, body
   background: #fff; font-weight: 700; font-size: 1.1rem; pointer-events: auto; box-shadow: var(--shadow); animation: pulse 1.2s ease-in-out infinite; }
 .sew-dot.done { background: var(--green); color: #fff; animation: none; }
 @media (max-width: 760px) { .akut-door { top: 88px; } }
+
+/* ---------- Vargen och vakthunden ---------- */
+.wolf, .guard-dog { position: absolute; width: clamp(100px, 16vmin, 170px); transform: translate(-50%, -100%); pointer-events: none; text-align: center; }
+.wolf .animal, .guard-dog .animal { width: 100%; height: auto; display: block; }
+.wolf.running .wolf-svg, .guard-dog.running .animal { animation: walk .25s ease-in-out infinite alternate; }
+.wolf.ko .wolf-svg { transform: rotate(80deg) translate(20%, -10%); transition: transform .4s; }
+.wolf-hp { display: flex; justify-content: center; gap: 2px; margin-top: -6px; }
+.wolf-hp i { width: 22px; height: 22px; }
+.wolf-hp i.gone { opacity: .2; filter: grayscale(1); }
+.guard-dog { z-index: 40; }
+.guard-dog .nametag { margin-top: -6px; background: #dbe4ff; }
+.wolf-banner { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 160; width: min(92%, 520px);
+  background: #fff; border: 3px solid var(--red); border-radius: 18px; padding: 10px 14px; text-align: center; box-shadow: var(--shadow); }
+.wolf-choice { display: flex; gap: 10px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+.wolf-timer { font-size: 1.8rem; font-weight: 700; color: var(--red); font-variant-numeric: tabular-nums; }
+.wolf-timer.low { animation: pulse .5s ease-in-out infinite; }
+.garden.hunting { cursor: crosshair; }
+.garden.hunting .pet { cursor: crosshair; }
+.shot-puff { position: absolute; width: 40px; height: 40px; margin: -20px; border-radius: 50%; pointer-events: none; z-index: 170;
+  background: radial-gradient(#fff 20%, #ffd43b 45%, rgba(255, 146, 43, 0) 70%); animation: puff .5s ease-out forwards; }
+.shot-puff.big { width: 140px; height: 140px; margin: -70px; background: radial-gradient(#fff 30%, rgba(220, 220, 230, .8) 55%, rgba(220, 220, 230, 0) 72%); }
+@keyframes puff { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.4); opacity: 0; } }
+.dizzy { transform-box: fill-box; transform-origin: center; animation: spin 1s linear infinite; }

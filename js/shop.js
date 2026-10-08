@@ -48,6 +48,10 @@ const Shop = {
         <p>Du har ${s.slots} platser och ${s.animals.length} djur.</p>
         ${full ? '<p><b>Du har maximalt antal platser!</b></p>'
           : `<button class="btn green" id="buy-slot" ${s.coins < SLOT_PRICE ? 'disabled' : ''}>Köp · ${this.price(SLOT_PRICE)}</button>`}</div>
+        <div class="shop-item">${drawAnimal({ id: 77, species: 'hund', color: 2, acc: { head: null, neck: 'halsband', face: null } }, { mood: 'happy', still: true })}<h3>Vakthund</h3>
+          <p>Jagar bort vargen när den kommer. Du får välja om du vill skjuta själv eller skicka hunden.</p>
+          ${s.guardDog ? '<p><b>Köpt!</b> Vakthunden vaktar gården.</p>'
+            : `<button class="btn green" id="buy-guard" ${s.coins < GUARD_PRICE ? 'disabled' : ''}>Köp · ${this.price(GUARD_PRICE)}</button>`}</div>
         <div class="shop-item">${uiIcon('coin')}<h3>Tjäna mynt</h3><p>Du får mynt varje gång du hjälper ett skadat djur. Vilda patienter ger extra!</p></div>`;
     }
     $('#shop-grid').innerHTML = html;
@@ -56,6 +60,8 @@ const Shop = {
     $$('[data-buy-acc]').forEach(b => b.addEventListener('click', () => this.buy(ACCESSORIES[b.dataset.buyAcc].price, () => { s.owned.push(b.dataset.buyAcc); })));
     const slot = $('#buy-slot');
     if (slot) slot.addEventListener('click', () => this.buy(SLOT_PRICE, () => { s.slots++; }));
+    const guard = $('#buy-guard');
+    if (guard) guard.addEventListener('click', () => this.buy(GUARD_PRICE, () => { s.guardDog = true; }));
   },
 
   buy(cost, give) {

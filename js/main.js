@@ -307,6 +307,7 @@ window.addEventListener('DOMContentLoaded', () => {
   Shop.setup();
   Play.setup();
   Walk.setup();
+  Wolf.setup();
 
   $('#adopt-btn').addEventListener('click', () => Adopt.adopt());
   $('#name-input').addEventListener('keydown', e => { if (e.key === 'Enter') Adopt.adopt(); });
