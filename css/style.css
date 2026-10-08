@@ -435,10 +435,27 @@ body[data-scene="natt"] #garden-animals, body[data-scene="natt"] .play-pet, body
 
 /* Miljöväljaren */
 .picker-head { margin: 0 0 12px; text-align: center; }
-.theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-.theme-card { background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 6px; display: flex; flex-direction: column; gap: 6px; font-weight: 600; text-align: center; box-shadow: var(--shadow); }
-.theme-card.selected { background: #fff0c2; outline: 4px solid var(--coral); }
-.theme-card small { display: block; font-weight: 400; font-size: .75rem; color: var(--ink-soft); }
-.theme-prev { position: relative; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; }
+.theme-prev { position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; border: 3px solid var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
+.chip { border: 3px solid var(--ink); border-radius: 999px; background: #fff; padding: 6px 14px; font-weight: 600; }
+.chip small { font-weight: 400; color: var(--ink-soft); }
+.chip.on { background: var(--coral); color: #fff; }
+.chip.on small { color: #fff; }
+#modal-box .label { margin-top: 12px; }
+.picker-note { font-size: .85rem; color: var(--ink-soft); margin: 10px 0 0; }
 .theme-prev .weather { z-index: 1; }
 .theme-prev .flake { width: 4px !important; height: 4px !important; }
+
+/* Regn, åska och snöstorm */
+.drop { position: absolute; top: -40px; width: 2px; height: 22px; border-radius: 2px; background: linear-gradient(transparent, rgba(190, 215, 245, .9)); animation: rainfall linear infinite; }
+.drop.storm { width: 2.5px; height: 30px; transform: rotate(15deg); animation-name: rainstorm; }
+@keyframes rainfall { to { transform: translateY(110vh); } }
+@keyframes rainstorm { from { transform: translate(0, 0) rotate(15deg); } to { transform: translate(-30vh, 110vh) rotate(15deg); } }
+.flake.storm { animation-name: blizzard; }
+@keyframes blizzard { to { transform: translate(60vw, 110vh); } }
+.lightning { position: absolute; inset: 0; background: #fff; opacity: 0; animation: flash 9s infinite; }
+@keyframes flash { 0%, 60%, 63%, 66%, 100% { opacity: 0; } 61% { opacity: .75; } 64% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) {
+  .drop { display: none; }
+  .lightning { animation: none; }
+}

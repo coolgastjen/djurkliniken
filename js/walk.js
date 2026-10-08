@@ -7,8 +7,8 @@ const WALK_TIME = 40;  // sekunder
 const svgUrl = svg => `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 
 // Landskapet för promenaden, i rätt miljö (sommar, höst, vinter, natt, solnedgång)
-function walkArt(themeId) {
-  const T = THEMES[themeId] || THEMES.sommar;
+function walkArt(theme) {
+  const T = themeOf(theme);
   const snowTop = T.snow ? `<path d="M570 70 L600 140 Q585 132 570 140 Q555 132 540 140Z" fill="#fff"/><path d="M570 120 L604 184 Q588 176 570 184 Q552 176 536 184Z" fill="#fff"/>` : '';
   const fruit = T.fruit ? `<circle cx="100" cy="110" r="9" fill="${T.fruit}"/><circle cx="150" cy="140" r="9" fill="${T.fruit}"/><circle cx="110" cy="160" r="9" fill="${T.fruit}"/>` : '';
   const flowers = T.flowers ? `<circle cx="320" cy="270" r="6" fill="#ff8fab"/><circle cx="360" cy="262" r="6" fill="#ffd43b"/><circle cx="780" cy="280" r="6" fill="#fff"/>` : '';
@@ -72,12 +72,12 @@ const Walk = {
     });
   },
 
-  applyTheme(themeId) {
-    this.art = walkArt(themeId);
+  applyTheme(theme) {
+    this.art = walkArt(theme);
     $('#walk-field').style.background = this.art.sky;
     $('#walk-hills').style.backgroundImage = svgUrl(this.art.hills);
     $('#walk-trees').style.backgroundImage = svgUrl(this.art.trees);
-    $('#walk-weather').innerHTML = weatherHtml(themeId);
+    $('#walk-weather').innerHTML = weatherHtml(theme);
     if (this.a) $('#walk-ground').style.backgroundImage = svgUrl(this.ride ? this.art.rideGround : this.art.ground);
   },
 

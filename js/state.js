@@ -19,7 +19,8 @@ const Game = {
       food: { hundgodis: 4, kattmat: 4, morot: 4, ho: 4, apple: 4, fron: 4, mask: 4, notter: 4, sallad: 4 },
       owned: [],
       sound: true,
-      theme: null,
+      scene: { season: 'auto', time: 'auto', weather: 'auto' },
+      autoWeather: null,
       healed: 0,
       lastSeen: Date.now(),
       timers: { injury: 50, wild: 25 },
@@ -38,6 +39,7 @@ const Game = {
         const data = JSON.parse(raw);
         this.s = Object.assign(fresh, data);
         this.s.food = Object.assign(fresh.food, data.food || {});
+        this.s.scene = Object.assign({ season: 'auto', time: 'auto', weather: 'auto' }, data.scene || {});
         this.s.timers = Object.assign({ injury: 50, wild: 25 }, data.timers || {});
         return true;
       }

@@ -26,44 +26,78 @@ function show(name, arg) {
 // ---------- Miljöer ----------
 
 let appliedTheme = null;
+let currentT = null;
 
-function currentTheme() {
-  const t = Game.s && Game.s.theme;
-  return t && THEMES[t] ? t : autoTheme();
+// Vädret slumpas om med några minuters mellanrum när det står på automatiskt
+function autoWeather() {
+  if (!Game.s) return 'klart';
+  const aw = Game.s.autoWeather;
+  if (aw && aw.until > Date.now()) return aw.w;
+  const x = Math.random();
+  const w = x < 0.6 ? 'klart' : x < 0.88 ? 'regn' : 'aska';
+  Game.s.autoWeather = { w, until: Date.now() + (3 + Math.random() * 4) * 60000 };
+  return w;
+}
+
+function sceneSettings() {
+  return (Game.s && Game.s.scene) || { season: 'auto', time: 'auto', weather: 'auto' };
+}
+
+function currentScene() {
+  const set = sceneSettings();
+  return {
+    season: set.season === 'auto' ? autoSeason() : set.season,
+    time: set.time === 'auto' ? autoTime() : set.time,
+    weather: set.weather === 'auto' ? autoWeather() : set.weather,
+  };
 }
 
 function applyTheme(force = false) {
-  const t = currentTheme();
-  if (!force && t === appliedTheme) return;
-  appliedTheme = t;
-  document.body.dataset.scene = t;
-  $('#garden-bg').innerHTML = gardenBg(t);
-  $('#garden-weather').innerHTML = weatherHtml(t);
-  $('#play-bg').innerHTML = gardenBg(t);
-  $('#play-weather').innerHTML = weatherHtml(t);
-  $('#clinic-bg').innerHTML = clinicBg(t);
-  Walk.applyTheme(t);
+  const sc = currentScene();
+  const T = buildTheme(sc.season, sc.time, sc.weather);
+  if (!force && appliedTheme === T.key) return;
+  appliedTheme = T.key;
+  currentT = T;
+  document.body.dataset.scene = sc.time;
+  document.body.dataset.weather = sc.weather;
+  $('#garden-bg').innerHTML = gardenBg(T);
+  $('#garden-weather').innerHTML = weatherHtml(T);
+  $('#play-bg').innerHTML = gardenBg(T);
+  $('#play-weather').innerHTML = weatherHtml(T);
+  $('#clinic-bg').innerHTML = clinicBg(T);
+  Walk.applyTheme(T);
 }
 
 function openThemePicker() {
   Sound.click();
-  const chosen = (Game.s && Game.s.theme) || 'auto';
-  const card = (id, label, prev) => `<button class="theme-card ${chosen === id ? 'selected' : ''}" data-theme-id="${id}">${themePreview(prev)}<span>${label}</span></button>`;
-  openModal(`<h2 class="picker-head">Välj miljö</h2>
-    <div class="theme-grid">
-      ${card('auto', `Automatiskt <small>Just nu: ${THEMES[autoTheme()].name.toLowerCase()}</small>`, autoTheme())}
-      ${THEME_ORDER.map(id => card(id, THEMES[id].name, id)).join('')}
-    </div>
+  const set = sceneSettings();
+  const now = currentScene();
+  const chip = (group, val, label) => `<button class="chip ${set[group] === val ? 'on' : ''}" data-g="${group}" data-v="${val}">${label}</button>`;
+  const autoLabel = txt => `Auto <small>(${txt.toLowerCase()})</small>`;
+  openModal(`<h2 class="picker-head">Miljö och väder</h2>
+    ${themePreview(currentT || buildTheme(now.season, now.time, now.weather))}
+    <p class="label">Årstid</p>
+    <div class="chips">${chip('season', 'auto', autoLabel(SEASON_NAMES[autoSeason()]))}${SEASONS.map(v => chip('season', v, SEASON_NAMES[v])).join('')}</div>
+    <p class="label">Tid på dygnet</p>
+    <div class="chips">${chip('time', 'auto', autoLabel(TIME_NAMES[autoTime()]))}${TIMES.map(v => chip('time', v, TIME_NAMES[v])).join('')}</div>
+    <p class="label">Väder</p>
+    <div class="chips">${chip('weather', 'auto', 'Auto <small>(växlar)</small>')}${WEATHERS.map(v => chip('weather', v, weatherName(v, now.season))).join('')}</div>
+    <p class="picker-note">Auto följer klockan och kalendern. Vädret på auto växlar av sig självt med några minuters mellanrum.</p>
     <div class="modal-footer"><button class="btn white" id="theme-close">Stäng</button></div>`);
   $('#theme-close').onclick = () => { Sound.click(); closeModal(); };
-  $$('[data-theme-id]').forEach(b => b.addEventListener('click', () => {
-    const id = b.dataset.themeId;
-    Game.s.theme = id === 'auto' ? null : id;
+  $$('#modal-box .chip').forEach(b => b.addEventListener('click', () => {
+    Game.s.scene = { ...sceneSettings(), [b.dataset.g]: b.dataset.v };
+    if (b.dataset.g === 'weather') Game.s.autoWeather = null;
     Game.save();
     Sound.pop();
     applyTheme(true);
-    closeModal();
+    openThemePicker();
   }));
+}
+
+// Åskmuller ibland när det åskar
+function maybeThunder() {
+  if (currentT && currentT.lightning && ['home', 'play', 'walk'].includes(currentScreen) && Math.random() < 0.12) Sound.thunder();
 }
 
 function updateHud() {
@@ -227,6 +261,7 @@ function mainLoop() {
   setInterval(() => {
     if (!Game.s || currentScreen === 'start') return;
     Home.tick(1);
+    maybeThunder();
     if (++saveCounter >= 10) { saveCounter = 0; Game.save(); applyTheme(); }
   }, 1000);
   window.addEventListener('beforeunload', () => Game.save());

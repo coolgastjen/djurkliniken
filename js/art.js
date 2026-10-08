@@ -27,32 +27,85 @@ const THEMES = {
     fruit: null, fence: '#fffaf0', fenceLine: '#b9c4d0', rail: '#e3e9f0', path: '#e6edf4', tuft: null,
     bush: '#eef4f9', ground: '#e9eff5', groundTop: '#ffffff', snow: true,
   },
-  natt: {
-    name: 'Natt', sky: ['#0f1c3d', '#34497a'], moon: true, cloud: '#4a5a80',
-    hills: ['#2f5a46', '#284f3d'], grass: ['#2f5f3c', '#22472d'], leaf: '#2f6b3a', leaf2: '#2f6b3a', pine: '#21503a',
-    fruit: '#a84a4a', fence: '#9aa3bf', fenceLine: '#6d7590', rail: '#7a83a0', path: '#5d5a52', tuft: '#244a2c',
-    bush: '#2c5a36', ground: '#6b5a48', groundTop: '#2f5f3c', flowers: true, dim: true,
-  },
-  kvall: {
-    name: 'Solnedgång', sky: ['#5b4b9a', '#ff9a76', '#ffd29a'], sunset: true, sun: '#ff8c42', cloud: '#ffc2a8',
-    hills: ['#a8b86f', '#93a85f'], grass: ['#9fc06a', '#76a046'], leaf: '#4f9a3e', leaf2: '#4f9a3e', pine: '#35754a',
-    fruit: '#ff6b6b', fence: '#fff1e0', fenceLine: '#c9a98c', rail: '#ead2bd', path: '#e7c494', tuft: '#5a8f3a',
-    bush: '#5f9a42', ground: '#d9b07c', groundTop: '#86b05a', flowers: true,
-  },
 };
-const THEME_ORDER = ['sommar', 'host', 'vinter', 'natt', 'kvall'];
 
-// Miljö efter klockan och årstiden
-function autoTheme() {
-  const d = new Date();
-  const h = d.getHours();
-  const m = d.getMonth();
-  if (h >= 21 || h < 6) return 'natt';
-  if (h >= 18) return 'kvall';
+
+const SEASONS = ['sommar', 'host', 'vinter'];
+const TIMES = ['dag', 'kvall', 'natt'];
+const WEATHERS = ['klart', 'regn', 'aska'];
+const SEASON_NAMES = { sommar: 'Sommar', host: 'Höst', vinter: 'Vinter' };
+const TIME_NAMES = { dag: 'Dag', kvall: 'Kväll', natt: 'Natt' };
+const weatherName = (w, season) => ({ klart: 'Klart', regn: season === 'vinter' ? 'Snöfall' : 'Regn', aska: season === 'vinter' ? 'Snöstorm' : 'Åska' }[w]);
+
+// Årstid och tid på dygnet efter kalendern och klockan
+function autoSeason() {
+  const m = new Date().getMonth();
   if (m === 11 || m <= 1) return 'vinter';
   if (m >= 8 && m <= 10) return 'host';
   return 'sommar';
 }
+function autoTime() {
+  const h = new Date().getHours();
+  if (h >= 21 || h < 6) return 'natt';
+  if (h >= 18) return 'kvall';
+  return 'dag';
+}
+
+// Blanda två färger (t = 0 ger a, t = 1 ger b)
+function mix(a, b, t) {
+  const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+  const A = p(a), B = p(b);
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+
+const LAND_KEYS = ['leaf', 'leaf2', 'pine', 'fruit', 'fence', 'fenceLine', 'rail', 'path', 'tuft', 'bush', 'ground', 'groundTop'];
+function tintLand(T, col, t) {
+  T.hills = T.hills.map(c => mix(c, col, t));
+  T.grass = T.grass.map(c => mix(c, col, t));
+  for (const k of LAND_KEYS) if (T[k]) T[k] = mix(T[k], col, t);
+}
+
+// Bygg ihop en miljö av årstid, tid på dygnet och väder
+function buildTheme(season = 'sommar', time = 'dag', weather = 'klart') {
+  const B = THEMES[season] || THEMES.sommar;
+  const T = { ...B, hills: [...B.hills], grass: [...B.grass], season, time, weather };
+  const winter = season === 'vinter';
+  const wet = weather !== 'klart';
+  T.snow = winter;
+  T.fallenLeaves = season === 'host';
+  T.overcast = wet;
+  T.rain = wet && !winter;
+  T.storm = weather === 'aska';
+  T.snowfall = wet && winter;
+  T.lightning = T.storm && !winter;
+  if (wet && time === 'dag') {
+    T.sky = T.storm ? ['#4a5566', '#8a95a3'] : ['#8a98a8', '#c9d2db'];
+    T.cloud = T.storm ? '#5a6474' : '#aab4bf';
+    tintLand(T, '#556070', T.storm ? 0.3 : 0.18);
+  }
+  if (time === 'kvall') {
+    T.sky = wet ? ['#4a4560', '#8a7a8a'] : ['#5b4b9a', '#ff9a76', '#ffd29a'];
+    T.sunset = !wet;
+    T.sun = '#ff8c42';
+    T.cloud = wet ? '#6a6070' : '#ffc2a8';
+    tintLand(T, '#ff7a3c', 0.1);
+    tintLand(T, '#3a2a50', wet ? 0.3 : 0.15);
+  }
+  if (time === 'natt') {
+    T.sky = wet ? ['#0b1220', '#262f45'] : ['#0f1c3d', '#34497a'];
+    T.moon = !wet;
+    T.stars = !wet;
+    T.fireflies = season === 'sommar' && !wet;
+    T.cloud = '#3a4766';
+    T.dim = true;
+    tintLand(T, '#0f1c3d', winter ? 0.45 : 0.55);
+  }
+  T.flowers = B.flowers;
+  T.key = [season, time, weather].join('-');
+  return T;
+}
+
+const themeOf = x => (x && typeof x === 'object') ? x : buildTheme();
 
 let _bgId = 0;
 const skyStops = sky => sky.map((c, i) => `<stop offset="${i / (sky.length - 1)}" stop-color="${c}"/>`).join('');
@@ -79,6 +132,7 @@ function sunOrMoon(T, x, y) {
     return `<g transform="translate(${x} ${y})"><circle r="42" fill="#fff6cc" opacity=".25"/><circle r="34" fill="#fff3c4" stroke="#e6d58f" stroke-width="3"/>
       <circle cx="-10" cy="-8" r="6" fill="#efe1a6"/><circle cx="12" cy="6" r="8" fill="#efe1a6"/><circle cx="-4" cy="14" r="4" fill="#efe1a6"/></g>`;
   }
+  if (T.overcast) return '';
   if (T.sunset) {
     return `<g transform="translate(${x} ${y + 150})"><circle r="70" fill="#ffb36b" opacity=".35"/><circle r="52" fill="${T.sun}" stroke="#ff7a3c" stroke-width="5"/></g>`;
   }
@@ -86,8 +140,8 @@ function sunOrMoon(T, x, y) {
     <circle r="48" fill="${T.sun}" stroke="#ffc933" stroke-width="5"/></g>`;
 }
 
-function gardenBg(themeId = 'sommar') {
-  const T = THEMES[themeId] || THEMES.sommar;
+function gardenBg(theme) {
+  const T = themeOf(theme);
   const u = 'bg' + (++_bgId);
   let fence = '';
   for (let x = -10; x <= 1010; x += 46) {
@@ -125,6 +179,7 @@ function gardenBg(themeId = 'sommar') {
   <rect width="1000" height="600" fill="url(#${u}s)"/>
   ${sunOrMoon(T, 860, 90)}
   ${cloud(180, 80, 1, 'drift1', T.cloud)}${cloud(560, 60, 0.8, 'drift2', T.cloud)}${cloud(380, 140, 0.6, 'drift1', T.cloud)}
+  ${T.overcast ? cloud(60, 30, 1.7, 'drift2', T.cloud) + cloud(760, 50, 1.9, 'drift1', T.cloud) + cloud(440, 10, 1.6, 'drift2', T.cloud) + cloud(920, 120, 1.2, 'drift1', T.cloud) : ''}
   <path d="M0 250 Q150 170 320 230 Q480 160 650 225 Q820 170 1000 230 V320 H0Z" fill="${T.hills[0]}"/>
   <path d="M0 275 Q200 220 420 268 Q640 230 1000 270 V320 H0Z" fill="${T.hills[1]}"/>
   <g transform="translate(770 150)">
@@ -157,27 +212,36 @@ function gardenBg(themeId = 'sommar') {
   </svg>`;
 }
 
-// Väder och ljus som ligger ovanpå bakgrunden (snö, löv, stjärnor, eldflugor)
-function weatherHtml(themeId) {
-  const T = THEMES[themeId] || THEMES.sommar;
-  const r = (a, b) => (a + Math.random() * (b - a)).toFixed(1);
+// Väder och ljus som ligger ovanpå bakgrunden (regn, blixtar, snö, löv, stjärnor, eldflugor)
+function weatherHtml(theme) {
+  const T = themeOf(theme);
+  const r = (a, b) => (a + Math.random() * (b - a)).toFixed(2);
   let h = '';
-  if (T.snow) {
-    for (let i = 0; i < 45; i++) {
+  if (T.rain) {
+    const n = T.storm ? 110 : 65;
+    for (let i = 0; i < n; i++) {
+      h += `<i class="drop${T.storm ? ' storm' : ''}" style="left:${r(-10, 105)}%;animation-duration:${T.storm ? r(0.35, 0.55) : r(0.55, 0.9)}s;animation-delay:-${r(0, 1)}s"></i>`;
+    }
+  }
+  if (T.lightning) h += `<i class="lightning" style="animation-delay:-${r(0, 9)}s"></i>`;
+  if (T.snowfall) {
+    const n = T.storm ? 110 : 50;
+    for (let i = 0; i < n; i++) {
       const s = r(4, 10);
-      h += `<i class="flake" style="left:${r(-5, 100)}%;width:${s}px;height:${s}px;animation-duration:${r(7, 15)}s;animation-delay:-${r(0, 15)}s"></i>`;
+      h += `<i class="flake${T.storm ? ' storm' : ''}" style="left:${r(-30, 100)}%;width:${s}px;height:${s}px;animation-duration:${T.storm ? r(2, 4) : r(7, 15)}s;animation-delay:-${r(0, 15)}s"></i>`;
     }
   }
-  if (T.fallenLeaves) {
+  if (T.fallenLeaves && !T.snowfall) {
     const cols = ['#e8893a', '#d9534f', '#f2b134'];
-    for (let i = 0; i < 12; i++) {
-      h += `<i class="leaf-fx" style="left:${r(-5, 95)}%;background:${cols[i % 3]};animation-duration:${r(9, 16)}s;animation-delay:-${r(0, 16)}s"></i>`;
+    const n = T.storm ? 20 : 12;
+    for (let i = 0; i < n; i++) {
+      h += `<i class="leaf-fx" style="left:${r(-5, 95)}%;background:${cols[i % 3]};animation-duration:${T.storm ? r(4, 7) : r(9, 16)}s;animation-delay:-${r(0, 16)}s"></i>`;
     }
   }
-  if (T.moon) {
-    for (let i = 0; i < 40; i++) {
-      h += `<i class="star-fx" style="left:${r(0, 100)}%;top:${r(1, 38)}%;animation-delay:-${r(0, 3)}s"></i>`;
-    }
+  if (T.stars) {
+    for (let i = 0; i < 40; i++) h += `<i class="star-fx" style="left:${r(0, 100)}%;top:${r(1, 38)}%;animation-delay:-${r(0, 3)}s"></i>`;
+  }
+  if (T.fireflies) {
     for (let i = 0; i < 9; i++) {
       h += `<i class="firefly" style="left:${r(5, 95)}%;top:${r(55, 92)}%;animation-duration:${r(3, 6)}s,${r(1.5, 3)}s;animation-delay:-${r(0, 6)}s"></i>`;
     }
@@ -187,8 +251,8 @@ function weatherHtml(themeId) {
 
 // ---------- Behandlingsrummet ----------
 
-function clinicBg(themeId = 'sommar') {
-  const T = THEMES[themeId] || THEMES.sommar;
+function clinicBg(theme) {
+  const T = themeOf(theme);
   const u = 'bg' + (++_bgId);
   let tiles = '';
   for (let x = 0; x <= 1000; x += 50) tiles += `<path d="M${x} 300 V470" stroke="#b3e2d6" stroke-width="2"/>`;
@@ -197,7 +261,9 @@ function clinicBg(themeId = 'sommar') {
   for (let y = 490; y < 600; y += 30) planks += `<path d="M0 ${y} H1000" stroke="#d9b98f" stroke-width="2"/>`;
   const bottles = [['#ff8787', 20], ['#74c0fc', 60], ['#8ce99a', 100], ['#ffd43b', 140]].map(([c, x]) =>
     `<rect x="${x}" y="-46" width="26" height="40" rx="6" fill="${c}" stroke="${OUT}" stroke-width="3"/><rect x="${x + 7}" y="-56" width="12" height="10" fill="#fff" stroke="${OUT}" stroke-width="3"/>`).join('');
-  const windowSky = T.moon
+  const windowSky = T.overcast
+    ? `<path d="M20 20 l-6 16 M60 10 l-6 16 M100 30 l-6 16 M140 14 l-6 16 M180 26 l-6 16 M40 60 l-6 16 M120 66 l-6 16 M170 70 l-6 16" stroke="${T.snowfall ? '#fff' : '#9fc4e8'}" stroke-width="${T.snowfall ? 4 : 2.5}" stroke-linecap="round" ${T.snowfall ? 'stroke-dasharray="1 9"' : ''}/>`
+    : T.moon
     ? `<circle cx="150" cy="45" r="20" fill="#fff3c4"/><circle cx="40" cy="30" r="2" fill="#fff"/><circle cx="80" cy="55" r="1.6" fill="#fff"/><circle cx="120" cy="20" r="1.8" fill="#fff"/>`
     : T.sunset ? `<circle cx="150" cy="110" r="24" fill="${T.sun}"/>` : `<circle cx="150" cy="45" r="22" fill="${T.sun}"/>`;
   return `<svg class="bg-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMax slice">
@@ -210,7 +276,6 @@ function clinicBg(themeId = 'sommar') {
     <rect width="200" height="160" rx="10" fill="url(#${u}w)" stroke="${OUT}" stroke-width="5"/>
     ${windowSky}
     <path d="M10 130 Q60 90 110 125 Q150 100 190 130 V150 H10Z" fill="${T.grass[0]}"/>
-    ${T.snow ? '<circle cx="40" cy="40" r="3" fill="#fff"/><circle cx="90" cy="70" r="3" fill="#fff"/><circle cx="170" cy="90" r="3" fill="#fff"/><circle cx="60" cy="100" r="3" fill="#fff"/>' : ''}
     <path d="M100 0 V160 M0 80 H200" stroke="#fff" stroke-width="8"/>
     <rect width="200" height="160" rx="10" fill="none" stroke="${OUT}" stroke-width="5"/>
     <path d="M-20 -10 Q20 80 -10 175 L-30 175 V-10Z" fill="#ff8fab" stroke="${OUT}" stroke-width="4"/>
@@ -239,8 +304,8 @@ function clinicBg(themeId = 'sommar') {
 }
 
 // Liten förhandsbild av en miljö (för miljöväljaren)
-function themePreview(themeId) {
-  return `<div class="theme-prev">${gardenBg(themeId)}<div class="weather">${weatherHtml(themeId)}</div></div>`;
+function themePreview(theme) {
+  return `<div class="theme-prev">${gardenBg(theme)}<div class="weather">${weatherHtml(theme)}</div></div>`;
 }
 
 const tableSvg = `<svg class="table-svg" viewBox="0 0 300 80" preserveAspectRatio="none">

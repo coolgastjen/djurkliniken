@@ -39,5 +39,23 @@ const Sound = {
   pop() { this.tone(400, 0.08, 'sine', 0.1, 0, 900); },
   alert() { [880, 660, 880].forEach((f, i) => this.tone(f, 0.12, 'triangle', 0.1, i * 0.15)); },
   happy() { this.tone(500, 0.15, 'sine', 0.1, 0, 1000); this.tone(600, 0.15, 'sine', 0.1, 0.15, 1200); },
+  thunder() {
+    if (!this.enabled) return;
+    const ctx = this.ensure();
+    if (!ctx) return;
+    const len = Math.floor(ctx.sampleRate * 2.2);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.2);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const f = ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.value = 160;
+    const g = ctx.createGain();
+    g.gain.value = 0.45;
+    src.connect(f).connect(g).connect(ctx.destination);
+    src.start();
+  },
   scrub() { this.tone(180 + Math.random() * 260, 0.05, 'triangle', 0.03); },
 };
