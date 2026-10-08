@@ -465,3 +465,8 @@ body[data-scene="natt"] #garden-animals, body[data-scene="natt"] .play-pet, body
 .anim .ghost { transform-box: fill-box; transform-origin: center; animation: ghostfloat 3s ease-in-out infinite; }
 @keyframes ghostfloat { 0%, 100% { transform: translateY(0); opacity: .9; } 50% { transform: translateY(-10px); opacity: .6; } }
 .dead-note { color: var(--ink-soft); margin: 12px 0 0; }
+
+/* Gravar */
+.grave { position: absolute; width: clamp(70px, 11vmin, 120px); transform: translate(-50%, -100%); text-align: center; cursor: pointer; }
+.grave-svg { width: 100%; display: block; }
+.grave .nametag { margin: 0 0 -4px; background: #f3ede6; font-size: .8rem; }

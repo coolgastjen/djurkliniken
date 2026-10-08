@@ -32,6 +32,7 @@ const Home = {
   },
 
   enter() {
+    this.renderGraves();
     this.renderPets(true);
     this.renderWild();
   },
@@ -79,6 +80,18 @@ const Home = {
       el.classList.toggle('dead', !!a.dead);
       this.renderBubble(a, el.querySelector('.bubble'));
     }
+  },
+
+  // Gravarna efter begravda djur ligger kvar på gården
+  renderGraves() {
+    const graves = Game.s.graves || [];
+    $('#garden-graves').innerHTML = graves.map((g, i) =>
+      `<div class="grave" data-i="${i}" style="left:${g.x}%;top:${g.y}%;z-index:${Math.round(g.y)}"><div class="nametag">${esc(g.name)}</div>${graveSvg()}</div>`).join('');
+    $$('#garden-graves .grave').forEach(el => el.addEventListener('click', () => {
+      const g = graves[+el.dataset.i];
+      Sound.click();
+      toast(`Här vilar ${g.name}, en ${SPECIES[g.species].name.toLowerCase()}.`);
+    }));
   },
 
   renderBubble(a, b) {
@@ -359,6 +372,10 @@ const Home = {
       case 'bury-no': Sound.click(); this.renderCard(); return;
       case 'bury-yes':
         Game.s.animals = Game.s.animals.filter(x => x !== a);
+        if (!Game.s.graves) Game.s.graves = [];
+        Game.s.graves.push({ name: a.name, species: a.species, x: a.x, y: a.y });
+        if (Game.s.graves.length > 30) Game.s.graves.shift();
+        this.renderGraves();
         Game.save();
         Sound.sad();
         toast(`Hej då, ${a.name}. Vila i frid.`);
@@ -495,7 +512,7 @@ const Home = {
     const types = Object.keys(INJURIES);
     p.innerHTML = '<b style="width:100%">Test: skada första djuret</b>' +
       types.map(t => `<button data-t="${t}">${t}</button>`).join('') +
-      '<button data-x="wild">vild patient</button><button data-x="coins">+100 mynt</button><button data-x="low">behov låga</button><button data-x="die">dö</button>';
+      '<button data-x="wild">vild patient</button><button data-x="coins">+100 mynt</button><button data-x="low">behov låga</button><button data-x="die">dö</button><button data-x="dieall">döda alla</button>';
     p.addEventListener('click', e => {
       const b = e.target.closest('button');
       if (!b) return;
@@ -508,6 +525,7 @@ const Home = {
       if (b.dataset.x === 'wild') { Game.s.wild = null; this.spawnWild(); }
       if (b.dataset.x === 'coins') { Game.addCoins(100); updateHud(); }
       if (b.dataset.x === 'die' && a) this.die(a, 'svalt');
+      if (b.dataset.x === 'dieall') Game.s.animals.filter(x => !x.dead).forEach(x => this.die(x, 'svalt'));
       if (b.dataset.x === 'low') Game.s.animals.forEach(x => Object.keys(x.needs).forEach(k => { x.needs[k] = 20; }));
     });
   },

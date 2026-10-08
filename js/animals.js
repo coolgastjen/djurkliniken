@@ -691,6 +691,18 @@ function drawSkeleton(a, opts = {}) {
   return `<svg class="animal dead ${opts.still ? '' : 'anim'}" viewBox="0 0 200 200" style="overflow:visible">${s}</svg>`;
 }
 
+// Grav: en jordhög med ett litet träkors
+function graveSvg() {
+  return `<svg class="grave-svg" viewBox="0 0 120 90">
+    <rect x="55" y="14" width="10" height="58" rx="2" fill="#9b6b43" ${SK}/>
+    <rect x="40" y="28" width="40" height="9" rx="2" fill="#9b6b43" ${SK}/>
+    <path d="M8 84 Q60 46 112 84 Z" fill="#8a5a3c" ${SK}/>
+    <circle cx="40" cy="74" r="2.5" fill="#6e4530"/><circle cx="72" cy="70" r="2" fill="#6e4530"/><circle cx="86" cy="78" r="2.5" fill="#6e4530"/>
+    <g transform="translate(30 70)"><circle cx="-3" cy="0" r="3" fill="#ff8fab"/><circle cx="3" cy="0" r="3" fill="#ff8fab"/><circle cx="0" cy="-3" r="3" fill="#ff8fab"/><circle r="2" fill="#ffe066"/></g>
+    <g transform="translate(92 74)"><circle cx="-3" cy="0" r="3" fill="#fff"/><circle cx="3" cy="0" r="3" fill="#fff"/><circle cx="0" cy="-3" r="3" fill="#fff"/><circle r="2" fill="#ffe066"/></g>
+  </svg>`;
+}
+
 // ---------- Rita ett helt djur ----------
 
 // opts: { mood, still (inga animationer), cls }

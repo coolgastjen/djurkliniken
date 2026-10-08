@@ -15,6 +15,7 @@ const Game = {
       slots: 4,
       nextId: 1,
       animals: [],
+      graves: [],
       wild: null,
       food: { hundgodis: 4, kattmat: 4, morot: 4, ho: 4, apple: 4, fron: 4, mask: 4, notter: 4, sallad: 4 },
       owned: [],
