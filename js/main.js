@@ -35,7 +35,7 @@ function autoWeather() {
   if (aw && aw.until > Date.now()) return aw.w;
   const x = Math.random();
   const w = x < 0.6 ? 'klart' : x < 0.88 ? 'regn' : 'aska';
-  Game.s.autoWeather = { w, until: Date.now() + (3 + Math.random() * 4) * 60000 };
+  Game.s.autoWeather = { w, until: Date.now() + (2 + Math.random() * 2) * 60000 };
   return w;
 }
 
@@ -52,10 +52,28 @@ function currentScene() {
   };
 }
 
-function applyTheme(force = false) {
+const TIME_MSG = { dag: 'God morgon! En ny dag börjar.', kvall: 'Solen går ner...', natt: 'Nu är det natt. God natt!' };
+
+function announceChange(prev, sc) {
+  if (!prev || currentScreen === 'start') return;
+  if (prev.season !== sc.season) toast(`Nu är det ${SEASON_NAMES[sc.season].toLowerCase()}!`, 'good');
+  else if (prev.time !== sc.time) toast(TIME_MSG[sc.time]);
+  if (prev.weather !== sc.weather) {
+    const winter = sc.season === 'vinter';
+    if (sc.weather === 'regn') toast(winter ? 'Det börjar snöa.' : 'Det börjar regna.');
+    else if (sc.weather === 'aska') toast(winter ? 'Snöstorm!' : 'Åh nej, det åskar!', 'alert');
+    else toast(winter ? 'Nu har det slutat snöa.' : 'Nu har det slutat regna.');
+  }
+}
+
+let lastScene = null;
+
+function applyTheme(force = false, announce = false) {
   const sc = currentScene();
   const T = buildTheme(sc.season, sc.time, sc.weather);
   if (!force && appliedTheme === T.key) return;
+  if (announce) announceChange(lastScene, sc);
+  lastScene = sc;
   appliedTheme = T.key;
   currentT = T;
   document.body.dataset.scene = sc.time;
@@ -82,7 +100,7 @@ function openThemePicker() {
     <div class="chips">${chip('time', 'auto', autoLabel(TIME_NAMES[autoTime()]))}${TIMES.map(v => chip('time', v, TIME_NAMES[v])).join('')}</div>
     <p class="label">Väder</p>
     <div class="chips">${chip('weather', 'auto', 'Auto <small>(växlar)</small>')}${WEATHERS.map(v => chip('weather', v, weatherName(v, now.season))).join('')}</div>
-    <p class="picker-note">Auto följer klockan och kalendern. Vädret på auto växlar av sig självt med några minuters mellanrum.</p>
+    <p class="picker-note">På auto går spelets egen klocka: ett dygn tar 6 minuter, årstiden byts var 12:e minut och vädret växlar med några minuters mellanrum.</p>
     <div class="modal-footer"><button class="btn white" id="theme-close">Stäng</button></div>`);
   $('#theme-close').onclick = () => { Sound.click(); closeModal(); };
   $$('#modal-box .chip').forEach(b => b.addEventListener('click', () => {
@@ -261,8 +279,10 @@ function mainLoop() {
   setInterval(() => {
     if (!Game.s || currentScreen === 'start') return;
     Home.tick(1);
+    Game.s.clock = (Game.s.clock || 0) + 1;
+    applyTheme(false, true);
     maybeThunder();
-    if (++saveCounter >= 10) { saveCounter = 0; Game.save(); applyTheme(); }
+    if (++saveCounter >= 10) { saveCounter = 0; Game.save(); }
   }, 1000);
   window.addEventListener('beforeunload', () => Game.save());
   document.addEventListener('visibilitychange', () => { if (document.hidden) Game.save(); });

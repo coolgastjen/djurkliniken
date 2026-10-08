@@ -21,6 +21,7 @@ const Game = {
       sound: true,
       scene: { season: 'auto', time: 'auto', weather: 'auto' },
       autoWeather: null,
+      clock: 0,
       healed: 0,
       lastSeen: Date.now(),
       timers: { injury: 50, wild: 25 },

@@ -37,18 +37,16 @@ const SEASON_NAMES = { sommar: 'Sommar', host: 'Höst', vinter: 'Vinter' };
 const TIME_NAMES = { dag: 'Dag', kvall: 'Kväll', natt: 'Natt' };
 const weatherName = (w, season) => ({ klart: 'Klart', regn: season === 'vinter' ? 'Snöfall' : 'Regn', aska: season === 'vinter' ? 'Snöstorm' : 'Åska' }[w]);
 
-// Årstid och tid på dygnet efter kalendern och klockan
+// Spelets egen klocka: ett dygn tar 6 minuter och årstiden byts varannan dag
+const DAY_SECONDS = 360;      // dag 0–180 s, kväll 180–240 s, natt 240–360 s
+const SEASON_DAYS = 2;
+const gameClock = () => (typeof Game !== 'undefined' && Game.s && Game.s.clock) || 0;
 function autoSeason() {
-  const m = new Date().getMonth();
-  if (m === 11 || m <= 1) return 'vinter';
-  if (m >= 8 && m <= 10) return 'host';
-  return 'sommar';
+  return SEASONS[Math.floor(gameClock() / (DAY_SECONDS * SEASON_DAYS)) % SEASONS.length];
 }
 function autoTime() {
-  const h = new Date().getHours();
-  if (h >= 21 || h < 6) return 'natt';
-  if (h >= 18) return 'kvall';
-  return 'dag';
+  const t = gameClock() % DAY_SECONDS;
+  return t < 180 ? 'dag' : t < 240 ? 'kvall' : 'natt';
 }
 
 // Blanda två färger (t = 0 ger a, t = 1 ger b)
