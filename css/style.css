@@ -169,13 +169,14 @@ input { font: inherit; }
 .empty-hint {
   position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); background: #fff; border: 3px solid var(--ink);
   border-radius: 20px; padding: 16px 22px; text-align: center; box-shadow: var(--shadow); width: min(90%, 420px);
+  z-index: 140;
 }
 .empty-hint p { margin: 0 0 12px; font-size: 1.15rem; }
 .wild-door {
   position: absolute; right: 12px; top: 12px; display: flex; align-items: center; gap: 8px;
   background: #fff; border: 3px solid var(--ink); border-radius: 20px; padding: 6px 14px 6px 6px;
   box-shadow: var(--shadow); max-width: min(330px, calc(100% - 24px)); text-align: left; font-weight: 600;
-  animation: wiggle 2s ease-in-out infinite; z-index: 3;
+  animation: wiggle 2s ease-in-out infinite; z-index: 140;
 }
 .wild-door .mini { width: 64px; height: 64px; flex: none; background: #ffe3e3; border-radius: 14px; }
 .wild-door small { display: block; font-weight: 400; color: var(--ink-soft); }
@@ -470,3 +471,13 @@ body[data-scene="natt"] #garden-animals, body[data-scene="natt"] .play-pet, body
 .grave { position: absolute; width: clamp(70px, 11vmin, 120px); transform: translate(-50%, -100%); text-align: center; cursor: pointer; }
 .grave-svg { width: 100%; display: block; }
 .grave .nametag { margin: 0 0 -4px; background: #f3ede6; font-size: .8rem; }
+
+/* Smal mobil: få plats med alla knappar i toppfältet */
+@media (max-width: 480px) {
+  .topbar { gap: 6px; padding: 8px 10px; }
+  .top-actions { gap: 6px; }
+  .icon-btn { width: 40px; height: 40px; padding: 6px; }
+  .top-actions .btn { padding: 6px 8px; }
+  .pill { padding: 2px 8px 2px 3px; gap: 3px; font-size: .9rem; }
+  .pill .ico, .pill-ico { width: 22px; height: 22px; }
+}

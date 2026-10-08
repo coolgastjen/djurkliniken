@@ -45,13 +45,17 @@ const Home = {
   },
 
   visualKey(a, mood) {
-    return JSON.stringify([mood, a.color, a.injury, a.mark && a.mark.kind, a.acc]);
+    return JSON.stringify([mood, a.color, a.injury, a.mark && a.mark.kind, a.acc, !!a.dead]);
   },
 
   renderPets(force = false) {
     const wrap = $('#garden-animals');
     const s = Game.s;
     $('#empty-hint').classList.toggle('hidden', s.animals.length > 0);
+    $('#empty-hint p').textContent = (s.graves || []).length
+      ? 'Du har inga djur just nu. Skaffa ett nytt djur att ta hand om!'
+      : 'Välkommen till din djurklinik! Du har inga egna djur än.';
+    $('#empty-hint .btn').textContent = (s.graves || []).length ? 'Skaffa ett nytt djur' : 'Skaffa ditt första djur';
     const ids = new Set(s.animals.map(a => a.id));
     for (const id in this.els) {
       if (!ids.has(+id)) { this.els[id].remove(); delete this.els[id]; }
