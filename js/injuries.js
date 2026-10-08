@@ -19,6 +19,11 @@ const TOOLS = {
   fastingplockare: 'Fästingplockare',
   forstoringsglas: 'Förstoringsglas',
   hovkratsa: 'Hovkratsa',
+  stetoskop: 'Stetoskop',
+  nasspray: 'Nässpray',
+  tandborste: 'Tandborste',
+  orondroppar: 'Örondroppar',
+  kylpase: 'Kylpåse',
 };
 
 const ACTION_TEXT = {
@@ -30,7 +35,7 @@ const ACTION_TEXT = {
 
 const SPOT_NAMES = {
   head: 'huvudet', eye: 'ögat', legL: 'benet', legR: 'benet', body: 'kroppen',
-  mouth: 'munnen', wing: 'vingen', hoof: 'hoven',
+  mouth: 'munnen', wing: 'vingen', hoof: 'hoven', ear: 'örat',
 };
 
 // ---------- Små ritfunktioner ----------
@@ -218,6 +223,89 @@ const INJURIES = {
     },
   },
 
+  magont: {
+    name: 'Magont', species: 'all', spots: ['body'],
+    problem: n => `${n} har ont i magen och vill inte äta.`,
+    event: n => `${n} har ätit något konstigt och fått ont i magen!`,
+    steps: [
+      { tool: 'stetoskop', action: 'hold', at: 'whole', hint: 'Lyssna på magen för att höra vad som är fel.', done: 'Det kurrar och bubblar i magen!' },
+      { tool: 'medicin', action: 'click', at: 'mouth', hint: 'Ge något som lugnar magen.', done: 'Medicinen gör magen lugnare.' },
+      { tool: 'filt', action: 'click', at: 'whole', hint: 'Nu behöver djuret vila och hålla sig varmt.', done: 'Snart är magen bra igen.' },
+    ],
+    mark: null,
+    draw: (x, y, step) => {
+      if (step >= 2) return '';
+      return at(100, 148, `<path d="M0 0 m-2 0 a2 2 0 1 1 4 0 a5 5 0 1 1 -10 0 a8 8 0 1 1 16 0 a11 11 0 1 1 -22 0" fill="none" stroke="#7bbf4a" stroke-width="3" stroke-linecap="round" opacity=".85"/>`) + sweatSvg(100, 70);
+    },
+  },
+
+  forkylning: {
+    name: 'Förkylning', species: 'all', spots: ['head'],
+    problem: n => `${n} nyser och har snuva.`,
+    event: n => `Atjoo! ${n} nyser och har blivit förkyld.`,
+    steps: [
+      { tool: 'stetoskop', action: 'hold', at: 'whole', hint: 'Lyssna på lungorna. Låter det rosslande?', done: 'Det rosslar lite. Det är en förkylning.' },
+      { tool: 'nasspray', action: 'click', at: 'mouth', hint: 'Något som gör det lättare att andas genom näsan.', done: 'Nu är näsan fri!' },
+      { tool: 'filt', action: 'click', at: 'whole', hint: 'Förkylda djur behöver hålla sig varma och vila.', done: 'Varmt och skönt.' },
+    ],
+    mark: null,
+    draw: (x, y, step, c, sp) => {
+      if (step >= 2) return '';
+      const [mx, my] = sp.spots.mouth;
+      return `<path d="M${mx + 4} ${my - 8} q-4 9 0 13 q4 -4 0 -13Z" fill="#b8e0a0" stroke="#7bbf4a" stroke-width="1.5"/>` +
+        (step === 0 ? at(mx, my - 8, `<path d="M18 -6 l10 -4 M20 2 l12 0 M18 10 l10 4" stroke="#74c0fc" stroke-width="3" stroke-linecap="round"/>`) : '');
+    },
+  },
+
+  tandvark: {
+    name: 'Tandvärk', species: ['hund', 'katt', 'kanin', 'marsvin', 'hamster', 'hast', 'rav', 'ekorre', 'gris', 'get', 'ko', 'igelkott'], spots: ['mouth'],
+    problem: n => `${n} har ont i en tand och kan inte tugga.`,
+    event: n => `${n} vill inte äta och verkar ha ont i munnen.`,
+    steps: [
+      { tool: 'forstoringsglas', action: 'hold', hint: 'Titta in i munnen. Vilken tand är det?', done: 'Där! En tand har fått ett litet hål.' },
+      { tool: 'tandborste', action: 'rub', hint: 'Borsta rent runt den onda tanden.', done: 'Skinande rena tänder!' },
+      { tool: 'medicin', action: 'click', hint: 'Ge något mot smärtan.', done: 'Nu gör det inte ont längre.' },
+    ],
+    mark: null,
+    draw: (x, y, step) => {
+      const cheek = at(x + 20, y - 6, `<ellipse rx="${step < 2 ? 12 : 8}" ry="${step < 2 ? 10 : 7}" fill="#ff7a7a" opacity=".45"/>`);
+      return cheek + (step === 0 ? at(x + 20, y - 6, `<path d="M14 -10 l6 -6 M16 0 l8 0 M14 10 l6 6" stroke="#e5484d" stroke-width="2.5" stroke-linecap="round"/>`) : '');
+    },
+  },
+
+  oron: {
+    name: 'Öroninflammation', species: ['hund', 'katt', 'kanin', 'marsvin', 'hamster', 'hast', 'rav', 'ekorre', 'gris', 'get', 'ko', 'igelkott'], spots: ['ear'],
+    problem: n => `${n} kliar sig i örat och skakar på huvudet.`,
+    event: n => `${n} skakar på huvudet. Något är fel med örat!`,
+    steps: [
+      { tool: 'forstoringsglas', action: 'hold', hint: 'Titta in i örat först.', done: 'Örat är rött och inflammerat.' },
+      { tool: 'tvatt', action: 'click', hint: 'Torka försiktigt rent i örat.', done: 'Rent i örat.' },
+      { tool: 'orondroppar', action: 'click', hint: 'Vilken medicin är gjord för öron?', done: 'Dropparna läker örat.' },
+    ],
+    mark: null,
+    draw: (x, y, step) => {
+      if (step === 0) return at(x, y, `<circle r="13" fill="#ff6b6b" opacity=".5"/><path d="M-20 -4 l-6 -3 M-20 4 l-6 3" stroke="#e5484d" stroke-width="2.5" stroke-linecap="round"/><circle cx="3" cy="4" r="2" fill="#e8d36a"/>`);
+      return at(x, y, `<circle r="11" fill="#ff8a8a" opacity="${step === 1 ? 0.45 : 0.25}"/>`);
+    },
+  },
+
+  bistick: {
+    name: 'Bistick', species: 'all', spots: ['head', 'legL', 'legR'],
+    problem: n => `${n} har blivit stucken av ett bi och det har svullnat upp.`,
+    event: n => `Aj! Ett bi stack ${n}!`,
+    steps: [
+      { tool: 'pincett', action: 'pull', hint: 'Gaddet sitter kvar. Ta bort det först.', done: 'Gaddet är borta!' },
+      { tool: 'kylpase', action: 'hold', hint: 'Svullnaden behöver kylas ner.', done: 'Svalt och skönt. Svullnaden minskar.' },
+      { tool: 'salva', action: 'click', hint: 'Något lindrande på huden mot klådan.', done: 'Nu kliar det inte längre.' },
+    ],
+    mark: null,
+    draw: (x, y, step) => {
+      if (step === 0) return at(x, y, `<circle r="13" fill="#ff6b6b" opacity=".6"/><circle r="6" fill="#ff4d4d" opacity=".7"/><path d="M0 0 L5 -9" stroke="#222" stroke-width="2.5" stroke-linecap="round"/>`);
+      if (step === 1) return at(x, y, `<circle r="12" fill="#ff6b6b" opacity=".55"/><circle r="5" fill="#ff4d4d" opacity=".6"/>`);
+      return at(x, y, `<circle r="9" fill="#ff8a8a" opacity=".4"/><circle r="11" fill="#a5d8ff" opacity=".35"/>`);
+    },
+  },
+
   skal: {
     name: 'Spricka i skalet', species: ['skoldpadda'], spots: ['body'],
     problem: n => `${n} har ramlat ner från en sten och fått en spricka i skalet.`,
@@ -285,7 +373,7 @@ function drawMark(mark, sp) {
 
 function moodFor(a) {
   if (a.injury) {
-    if (a.injury.type === 'feber' && a.injury.step < 2) return 'sick';
+    if (['feber', 'magont', 'forkylning'].includes(a.injury.type) && a.injury.step < 2) return 'sick';
     return a.injury.step === 0 ? 'sad' : 'neutral';
   }
   const n = a.needs;

@@ -70,7 +70,7 @@ const SPECIES = {
       { name: 'Vit med fläck', main: '#f7f3ec', light: '#ffffff', dark: '#4a444f', patch: true },
     ],
     eyes: [82, 118, 80], eyeR: 8, cheeks: [68, 132, 100], mouth: [100, 107, 9],
-    spots: { head: [100, 54], eye: [118, 80], legL: [80, 182], legR: [120, 182], body: [70, 150], mouth: [100, 110] },
+    spots: { ear: [52, 84], head: [100, 54], eye: [118, 80], legL: [80, 182], legR: [120, 182], body: [70, 150], mouth: [100, 110] },
     hat: [100, 44, 1], neck: [100, 125, 1],
     draw(c) {
       return `
@@ -100,7 +100,7 @@ const SPECIES = {
       { name: 'Vit', main: '#faf6f0', light: '#ffffff', dark: '#d9cbbd' },
     ],
     eyes: [80, 120, 84], eyeR: 8.5, cheeks: [66, 134, 102], mouth: [100, 108, 7],
-    spots: { head: [100, 60], eye: [120, 84], legL: [84, 183], legR: [116, 183], body: [70, 152], mouth: [100, 110] },
+    spots: { ear: [70, 46], head: [100, 60], eye: [120, 84], legL: [84, 183], legR: [116, 183], body: [70, 152], mouth: [100, 110] },
     hat: [100, 50, 1], neck: [100, 126, 0.9],
     draw(c) {
       return `
@@ -132,7 +132,7 @@ const SPECIES = {
       { name: 'Svart', main: '#4a4448', light: '#e7dfd8', dark: '#2c272b' },
     ],
     eyes: [84, 116, 86], eyeR: 8, cheeks: [70, 130, 103], mouth: [100, 109, 6],
-    spots: { head: [100, 60], eye: [116, 86], legL: [78, 184], legR: [122, 184], body: [68, 152], mouth: [100, 110] },
+    spots: { ear: [80, 30], head: [100, 60], eye: [116, 86], legL: [78, 184], legR: [122, 184], body: [68, 152], mouth: [100, 110] },
     hat: [100, 54, 0.9], neck: [100, 128, 0.9],
     draw(c) {
       return `
@@ -165,7 +165,7 @@ const SPECIES = {
       { name: 'Beige', main: '#e5c79f', light: '#fbf1e2', dark: '#b8966b', patch: '#c98e55' },
     ],
     eyes: [80, 120, 104], eyeR: 7.5, cheeks: [66, 134, 120], mouth: [100, 126, 6],
-    spots: { head: [100, 80], eye: [120, 104], legL: [76, 186], legR: [124, 186], body: [156, 140], mouth: [100, 127] },
+    spots: { ear: [62, 76], head: [100, 80], eye: [120, 104], legL: [76, 186], legR: [124, 186], body: [156, 140], mouth: [100, 127] },
     hat: [100, 74, 0.9], neck: [100, 146, 1],
     draw(c, mood, u) {
       return `
@@ -194,7 +194,7 @@ const SPECIES = {
       { name: 'Fux', main: '#c9733a', light: '#ebbd96', dark: '#4a3328', mane: '#f2d7a8', blaze: true },
     ],
     eyes: [80, 120, 70], eyeR: 7.5, cheeks: [74, 126, 92], mouth: [100, 115, 6],
-    spots: { head: [100, 50], eye: [120, 70], legL: [84, 168], legR: [116, 168], body: [134, 138], mouth: [100, 116], hoof: [84, 185] },
+    spots: { ear: [82, 30], head: [100, 50], eye: [120, 70], legL: [84, 168], legR: [116, 168], body: [134, 138], mouth: [100, 116], hoof: [84, 185] },
     hat: [100, 34, 0.85], neck: [100, 134, 0.8],
     draw(c) {
       return `
@@ -264,7 +264,7 @@ const SPECIES = {
       { name: 'Mörk', main: '#7a6250', light: '#e2c9a8', dark: '#43332a' },
     ],
     eyes: [84, 116, 120], eyeR: 6.5, cheeks: [72, 128, 136], mouth: [100, 160, 5],
-    spots: { head: [100, 96], eye: [116, 120], legL: [78, 186], legR: [122, 186], body: [150, 104], mouth: [100, 160] },
+    spots: { ear: [68, 98], head: [100, 96], eye: [116, 120], legL: [78, 186], legR: [122, 186], body: [150, 104], mouth: [100, 160] },
     hat: [100, 52, 0.9], neck: [100, 168, 0.9],
     draw(c) {
       const spikes = (r1, r2, cy, n) => {
@@ -299,7 +299,7 @@ const SPECIES = {
       { name: 'Svart', main: '#4a444f', light: '#7a7280', dark: '#2a262e' },
     ],
     eyes: [82, 118, 80], eyeR: 7.5, cheeks: [66, 134, 96], mouth: [100, 123, 7],
-    spots: { head: [100, 54], eye: [118, 80], legL: [80, 184], legR: [120, 184], body: [70, 150], mouth: [100, 124] },
+    spots: { ear: [70, 44], head: [100, 54], eye: [118, 80], legL: [80, 184], legR: [120, 184], body: [70, 150], mouth: [100, 124] },
     hat: [100, 48, 0.95], neck: [100, 130, 1],
     draw(c) {
       return `
@@ -329,7 +329,7 @@ const SPECIES = {
       { name: 'Svart', main: '#3e3a42', light: '#8a7f86', dark: '#1f1c20' },
     ],
     eyes: [84, 116, 72], eyeR: 7, cheeks: [70, 130, 90], mouth: [100, 116, 6],
-    spots: { head: [100, 46], eye: [116, 72], legL: [82, 170], legR: [118, 170], body: [140, 140], mouth: [100, 117], hoof: [82, 186] },
+    spots: { ear: [54, 66], head: [100, 46], eye: [116, 72], legL: [82, 170], legR: [118, 170], body: [140, 140], mouth: [100, 117], hoof: [82, 186] },
     hat: [100, 40, 0.85], neck: [100, 128, 0.9],
     draw(c, mood, u) {
       return `
@@ -362,7 +362,7 @@ const SPECIES = {
       { name: 'Grå', main: '#a7a2a0', light: '#e9e5e2', dark: '#4a4448' },
     ],
     eyes: [86, 114, 68], eyeR: 6.5, cheeks: [74, 126, 86], mouth: [100, 104, 5],
-    spots: { head: [100, 44], eye: [114, 68], legL: [84, 170], legR: [116, 170], body: [136, 142], mouth: [100, 105], hoof: [84, 185] },
+    spots: { ear: [60, 66], head: [100, 44], eye: [114, 68], legL: [84, 170], legR: [116, 170], body: [136, 142], mouth: [100, 105], hoof: [84, 185] },
     hat: [100, 40, 0.8], neck: [100, 120, 0.8],
     draw(c) {
       return `
@@ -444,7 +444,7 @@ const SPECIES = {
       { name: 'Brun', main: '#b4683a', light: '#f6e2cc', dark: '#3b2e2a' },
     ],
     eyes: [80, 120, 80], eyeR: 7.5, cheeks: [68, 132, 100], mouth: [100, 108, 7],
-    spots: { head: [100, 56], eye: [120, 80], legL: [84, 183], legR: [116, 183], body: [70, 152], mouth: [100, 110] },
+    spots: { ear: [72, 44], head: [100, 56], eye: [120, 80], legL: [84, 183], legR: [116, 183], body: [70, 152], mouth: [100, 110] },
     hat: [100, 48, 0.95], neck: [100, 126, 0.9],
     draw(c) {
       return `
@@ -474,7 +474,7 @@ const SPECIES = {
       { name: 'Svart', main: '#3e3a42', light: '#a39aa3', dark: '#1f1c20' },
     ],
     eyes: [86, 114, 90], eyeR: 7, cheeks: [76, 124, 104], mouth: [100, 112, 5],
-    spots: { head: [100, 66], eye: [114, 90], legL: [84, 184], legR: [116, 184], body: [74, 158], mouth: [100, 113] },
+    spots: { ear: [78, 52], head: [100, 66], eye: [114, 90], legL: [84, 184], legR: [116, 184], body: [74, 158], mouth: [100, 113] },
     hat: [100, 62, 0.8], neck: [100, 128, 0.8],
     draw(c) {
       return `
@@ -506,7 +506,7 @@ const SPECIES = {
       { name: 'Panda', main: '#3f3a3f', light: '#fbf6ef', dark: '#1f1c20' },
     ],
     eyes: [82, 118, 92], eyeR: 7, cheeks: [66, 134, 112], mouth: [100, 114, 5],
-    spots: { head: [100, 66], eye: [118, 92], legL: [80, 186], legR: [120, 186], body: [150, 150], mouth: [100, 115] },
+    spots: { ear: [66, 64], head: [100, 66], eye: [118, 92], legL: [80, 186], legR: [120, 186], body: [150, 150], mouth: [100, 115] },
     hat: [100, 60, 0.85], neck: [100, 134, 0.9],
     draw(c) {
       return `

@@ -17,9 +17,53 @@ function show(name, arg) {
   if (name === 'play') Play.enter(arg);
   if (name === 'walk') Walk.enter(arg);
   if (name !== 'treat') Treat.leave();
+  applyTheme();
   if (name !== 'play') Play.leave();
   if (name !== 'walk') Walk.leave();
   updateHud();
+}
+
+// ---------- Miljöer ----------
+
+let appliedTheme = null;
+
+function currentTheme() {
+  const t = Game.s && Game.s.theme;
+  return t && THEMES[t] ? t : autoTheme();
+}
+
+function applyTheme(force = false) {
+  const t = currentTheme();
+  if (!force && t === appliedTheme) return;
+  appliedTheme = t;
+  document.body.dataset.scene = t;
+  $('#garden-bg').innerHTML = gardenBg(t);
+  $('#garden-weather').innerHTML = weatherHtml(t);
+  $('#play-bg').innerHTML = gardenBg(t);
+  $('#play-weather').innerHTML = weatherHtml(t);
+  $('#clinic-bg').innerHTML = clinicBg(t);
+  Walk.applyTheme(t);
+}
+
+function openThemePicker() {
+  Sound.click();
+  const chosen = (Game.s && Game.s.theme) || 'auto';
+  const card = (id, label, prev) => `<button class="theme-card ${chosen === id ? 'selected' : ''}" data-theme-id="${id}">${themePreview(prev)}<span>${label}</span></button>`;
+  openModal(`<h2 class="picker-head">Välj miljö</h2>
+    <div class="theme-grid">
+      ${card('auto', `Automatiskt <small>Just nu: ${THEMES[autoTheme()].name.toLowerCase()}</small>`, autoTheme())}
+      ${THEME_ORDER.map(id => card(id, THEMES[id].name, id)).join('')}
+    </div>
+    <div class="modal-footer"><button class="btn white" id="theme-close">Stäng</button></div>`);
+  $('#theme-close').onclick = () => { Sound.click(); closeModal(); };
+  $$('[data-theme-id]').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.themeId;
+    Game.s.theme = id === 'auto' ? null : id;
+    Game.save();
+    Sound.pop();
+    applyTheme(true);
+    closeModal();
+  }));
 }
 
 function updateHud() {
@@ -75,8 +119,7 @@ function fillIcons() {
   $('#start-logo').innerHTML = logoSvg;
   $('#home-logo').innerHTML = logoSvg;
   $('#vet-face').innerHTML = vetSvg;
-  $('#garden-bg').innerHTML = gardenBg();
-  $('#clinic-bg').innerHTML = clinicBg();
+  $('#btn-theme').innerHTML = uiIcon('scene');
   $('#table-holder').innerHTML = tableSvg;
 }
 
@@ -184,7 +227,7 @@ function mainLoop() {
   setInterval(() => {
     if (!Game.s || currentScreen === 'start') return;
     Home.tick(1);
-    if (++saveCounter >= 10) { saveCounter = 0; Game.save(); }
+    if (++saveCounter >= 10) { saveCounter = 0; Game.save(); applyTheme(); }
   }, 1000);
   window.addEventListener('beforeunload', () => Game.save());
   document.addEventListener('visibilitychange', () => { if (document.hidden) Game.save(); });
@@ -211,6 +254,7 @@ window.addEventListener('DOMContentLoaded', () => {
   $('#adopt-btn').addEventListener('click', () => Adopt.adopt());
   $('#name-input').addEventListener('keydown', e => { if (e.key === 'Enter') Adopt.adopt(); });
   $('#random-name').addEventListener('click', () => { Sound.pop(); $('#name-input').value = pick(NAMES); });
+  $('#btn-theme').addEventListener('click', openThemePicker);
   $('#btn-sound').addEventListener('click', () => {
     Game.s.sound = !Game.s.sound;
     Sound.enabled = Game.s.sound;
@@ -220,5 +264,6 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && !$('#modal').classList.contains('center')) closeModal(); });
 
+  applyTheme(true);
   mainLoop();
 });

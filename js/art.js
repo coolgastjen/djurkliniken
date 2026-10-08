@@ -6,73 +6,190 @@ const outlined = (shapes, fill, w = 6) =>
 
 const icon = (inner, vb = '0 0 64 64') => `<svg class="ico" viewBox="${vb}">${inner}</svg>`;
 
+// ---------- Miljöer (sommar, höst, vinter, natt, solnedgång) ----------
+
+const THEMES = {
+  sommar: {
+    name: 'Sommar', sky: ['#7cc8f8', '#d6f1ff'], sun: '#ffe066', cloud: '#ffffff',
+    hills: ['#b8e68f', '#a5dc7c'], grass: ['#9be07a', '#6cbf4c'], leaf: '#5fb548', leaf2: '#5fb548', pine: '#3f9a4a',
+    fruit: '#ff6b6b', fence: '#fffaf0', fenceLine: '#c9b79c', rail: '#e8dcc8', path: '#e9d3a8', tuft: '#5aa83f',
+    bush: '#6cc04a', ground: '#e3c08d', groundTop: '#7ccf5a', flowers: true,
+  },
+  host: {
+    name: 'Höst', sky: ['#8fb8da', '#e9eef0'], sun: '#ffd27a', cloud: '#f2f2f2',
+    hills: ['#d6c17a', '#c4ad62'], grass: ['#b5bf68', '#8d9a45'], leaf: '#e8893a', leaf2: '#f2b134', pine: '#3f7a4a',
+    fruit: '#c0392b', fence: '#fffaf0', fenceLine: '#c9b79c', rail: '#e8dcc8', path: '#d9bf8f', tuft: '#7f8f3a',
+    bush: '#c9893a', ground: '#d4b07c', groundTop: '#a9b45a', fallenLeaves: true,
+  },
+  vinter: {
+    name: 'Vinter', sky: ['#a9c8e4', '#eef5fb'], sun: '#fff3c4', cloud: '#ffffff',
+    hills: ['#f4f8fc', '#e4edf6'], grass: ['#f8fbfe', '#dce7f1'], leaf: '#eef4f9', leaf2: '#eef4f9', pine: '#3f7a5a',
+    fruit: null, fence: '#fffaf0', fenceLine: '#b9c4d0', rail: '#e3e9f0', path: '#e6edf4', tuft: null,
+    bush: '#eef4f9', ground: '#e9eff5', groundTop: '#ffffff', snow: true,
+  },
+  natt: {
+    name: 'Natt', sky: ['#0f1c3d', '#34497a'], moon: true, cloud: '#4a5a80',
+    hills: ['#2f5a46', '#284f3d'], grass: ['#2f5f3c', '#22472d'], leaf: '#2f6b3a', leaf2: '#2f6b3a', pine: '#21503a',
+    fruit: '#a84a4a', fence: '#9aa3bf', fenceLine: '#6d7590', rail: '#7a83a0', path: '#5d5a52', tuft: '#244a2c',
+    bush: '#2c5a36', ground: '#6b5a48', groundTop: '#2f5f3c', flowers: true, dim: true,
+  },
+  kvall: {
+    name: 'Solnedgång', sky: ['#5b4b9a', '#ff9a76', '#ffd29a'], sunset: true, sun: '#ff8c42', cloud: '#ffc2a8',
+    hills: ['#a8b86f', '#93a85f'], grass: ['#9fc06a', '#76a046'], leaf: '#4f9a3e', leaf2: '#4f9a3e', pine: '#35754a',
+    fruit: '#ff6b6b', fence: '#fff1e0', fenceLine: '#c9a98c', rail: '#ead2bd', path: '#e7c494', tuft: '#5a8f3a',
+    bush: '#5f9a42', ground: '#d9b07c', groundTop: '#86b05a', flowers: true,
+  },
+};
+const THEME_ORDER = ['sommar', 'host', 'vinter', 'natt', 'kvall'];
+
+// Miljö efter klockan och årstiden
+function autoTheme() {
+  const d = new Date();
+  const h = d.getHours();
+  const m = d.getMonth();
+  if (h >= 21 || h < 6) return 'natt';
+  if (h >= 18) return 'kvall';
+  if (m === 11 || m <= 1) return 'vinter';
+  if (m >= 8 && m <= 10) return 'host';
+  return 'sommar';
+}
+
+let _bgId = 0;
+const skyStops = sky => sky.map((c, i) => `<stop offset="${i / (sky.length - 1)}" stop-color="${c}"/>`).join('');
+
 // ---------- Trädgården ----------
 
-function cloud(x, y, s, cls) {
-  return `<g class="${cls}" transform="translate(${x} ${y}) scale(${s})"><g fill="#fff">
+function cloud(x, y, s, cls, col = '#fff') {
+  return `<g class="${cls}" transform="translate(${x} ${y}) scale(${s})"><g fill="${col}">
     <ellipse cx="0" cy="0" rx="50" ry="22"/><ellipse cx="-28" cy="-10" rx="26" ry="20"/><ellipse cx="18" cy="-18" rx="30" ry="24"/></g></g>`;
 }
 
-function flower(x, y, col) {
-  return `<g transform="translate(${x} ${y})"><path d="M0 0 v14" stroke="#4f9a3a" stroke-width="2.5"/>
+function flower(x, y, col, dim) {
+  return `<g transform="translate(${x} ${y})" ${dim ? 'opacity=".55"' : ''}><path d="M0 0 v14" stroke="#4f9a3a" stroke-width="2.5"/>
     <circle cx="-4" cy="-3" r="4" fill="${col}"/><circle cx="4" cy="-3" r="4" fill="${col}"/><circle cx="0" cy="-7" r="4" fill="${col}"/><circle cx="0" cy="1" r="4" fill="${col}"/>
     <circle cx="0" cy="-3" r="2.8" fill="#ffe066"/></g>`;
 }
 
-function gardenBg() {
+function snowCap(d) {
+  return `<path d="${d}" fill="#fff" stroke="#c9d6e3" stroke-width="2" stroke-linejoin="round"/>`;
+}
+
+function sunOrMoon(T, x, y) {
+  if (T.moon) {
+    return `<g transform="translate(${x} ${y})"><circle r="42" fill="#fff6cc" opacity=".25"/><circle r="34" fill="#fff3c4" stroke="#e6d58f" stroke-width="3"/>
+      <circle cx="-10" cy="-8" r="6" fill="#efe1a6"/><circle cx="12" cy="6" r="8" fill="#efe1a6"/><circle cx="-4" cy="14" r="4" fill="#efe1a6"/></g>`;
+  }
+  if (T.sunset) {
+    return `<g transform="translate(${x} ${y + 150})"><circle r="70" fill="#ffb36b" opacity=".35"/><circle r="52" fill="${T.sun}" stroke="#ff7a3c" stroke-width="5"/></g>`;
+  }
+  return `<g transform="translate(${x} ${y})"><g class="spin">${Array.from({ length: 12 }, (_, i) => `<path d="M0 -62 L6 -78 L-6 -78Z" fill="#ffd43b" transform="rotate(${i * 30})"/>`).join('')}</g>
+    <circle r="48" fill="${T.sun}" stroke="#ffc933" stroke-width="5"/></g>`;
+}
+
+function gardenBg(themeId = 'sommar') {
+  const T = THEMES[themeId] || THEMES.sommar;
+  const u = 'bg' + (++_bgId);
   let fence = '';
   for (let x = -10; x <= 1010; x += 46) {
-    fence += `<path d="M${x} 300 v-56 l10 -12 l10 12 v56 Z" fill="#fffaf0" stroke="#c9b79c" stroke-width="2.5" stroke-linejoin="round"/>`;
+    fence += `<path d="M${x} 300 v-56 l10 -12 l10 12 v56 Z" fill="${T.fence}" stroke="${T.fenceLine}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    if (T.snow) fence += `<path d="M${x - 1} 246 l11 -14 l11 14 q-11 4 -22 0Z" fill="#fff"/>`;
   }
-  const flowers = [[60, 420, '#ff8fab'], [180, 520, '#ffd43b'], [330, 450, '#b197fc'], [470, 560, '#ff8fab'], [610, 470, '#ffffff'],
-    [760, 540, '#ffd43b'], [890, 440, '#ff8fab'], [960, 560, '#b197fc'], [260, 360, '#ffffff'], [700, 360, '#ff8fab'], [520, 330, '#ffd43b'], [120, 330, '#b197fc']]
-    .map(([x, y, c]) => flower(x, y, c)).join('');
-  let tufts = '';
-  [[100, 380], [240, 470], [400, 400], [560, 500], [680, 420], [840, 490], [940, 380], [30, 520], [380, 570], [800, 380]].forEach(([x, y]) => {
-    tufts += `<path d="M${x} ${y} l-5 -12 M${x} ${y} l0 -15 M${x} ${y} l5 -12" stroke="#5aa83f" stroke-width="3" stroke-linecap="round"/>`;
-  });
+  let ground = '';
+  if (T.flowers) {
+    ground += [[60, 420, '#ff8fab'], [180, 520, '#ffd43b'], [330, 450, '#b197fc'], [470, 560, '#ff8fab'], [610, 470, '#ffffff'],
+      [760, 540, '#ffd43b'], [890, 440, '#ff8fab'], [960, 560, '#b197fc'], [260, 360, '#ffffff'], [700, 360, '#ff8fab'], [520, 330, '#ffd43b'], [120, 330, '#b197fc']]
+      .map(([x, y, c]) => flower(x, y, c, T.dim)).join('');
+  }
+  if (T.fallenLeaves) {
+    ground += [[60, 420], [180, 520], [330, 450], [470, 560], [610, 470], [760, 540], [890, 440], [960, 560], [260, 360], [700, 360], [520, 330], [120, 330], [420, 380], [820, 400]]
+      .map(([x, y], i) => `<ellipse cx="${x}" cy="${y}" rx="9" ry="5" fill="${['#e8893a', '#d9534f', '#f2b134'][i % 3]}" transform="rotate(${i * 37} ${x} ${y})"/>`).join('');
+  }
+  if (T.snow) {
+    ground += [[140, 420, 60], [420, 520, 80], [760, 450, 70], [900, 560, 50]]
+      .map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r / 5}" fill="#fff" opacity=".8"/>`).join('');
+    ground += `<g transform="translate(680 400)"><circle cy="30" r="30" fill="#fff" stroke="#c9d6e3" stroke-width="3"/><circle cy="-14" r="22" fill="#fff" stroke="#c9d6e3" stroke-width="3"/>
+      <circle cx="-7" cy="-18" r="2.5" fill="${OUT}"/><circle cx="7" cy="-18" r="2.5" fill="${OUT}"/><path d="M0 -12 l12 3 l-12 3Z" fill="#ff922b"/>
+      <path d="M-20 4 l-22 -14 M20 4 l22 -14" stroke="#7a4a22" stroke-width="3" stroke-linecap="round"/><path d="M-16 -32 h32 l-4 -14 h-24Z" fill="#3b3540"/></g>`;
+  }
+  if (T.tuft) {
+    [[100, 380], [240, 470], [400, 400], [560, 500], [680, 420], [840, 490], [940, 380], [30, 520], [380, 570], [800, 380]].forEach(([x, y]) => {
+      ground += `<path d="M${x} ${y} l-5 -12 M${x} ${y} l0 -15 M${x} ${y} l5 -12" stroke="${T.tuft}" stroke-width="3" stroke-linecap="round"/>`;
+    });
+  }
+  const fruit = T.fruit ? `<circle cx="-20" cy="60" r="7" fill="${T.fruit}"/><circle cx="30" cy="90" r="7" fill="${T.fruit}"/><circle cx="-45" cy="115" r="7" fill="${T.fruit}"/><circle cx="20" cy="40" r="7" fill="${T.fruit}"/>` : '';
   return `<svg class="bg-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMax slice">
   <defs>
-    <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc8f8"/><stop offset="1" stop-color="#d6f1ff"/></linearGradient>
-    <linearGradient id="gGrass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9be07a"/><stop offset="1" stop-color="#6cbf4c"/></linearGradient>
+    <linearGradient id="${u}s" x1="0" y1="0" x2="0" y2="1">${skyStops(T.sky)}</linearGradient>
+    <linearGradient id="${u}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${T.grass[0]}"/><stop offset="1" stop-color="${T.grass[1]}"/></linearGradient>
   </defs>
-  <rect width="1000" height="600" fill="url(#gSky)"/>
-  <g transform="translate(860 90)"><g class="spin">${Array.from({ length: 12 }, (_, i) => `<path d="M0 -62 L6 -78 L-6 -78Z" fill="#ffd43b" transform="rotate(${i * 30})"/>`).join('')}</g>
-    <circle r="48" fill="#ffe066" stroke="#ffc933" stroke-width="5"/></g>
-  ${cloud(180, 80, 1, 'drift1')}${cloud(560, 60, 0.8, 'drift2')}${cloud(380, 140, 0.6, 'drift1')}
-  <path d="M0 250 Q150 170 320 230 Q480 160 650 225 Q820 170 1000 230 V320 H0Z" fill="#b8e68f"/>
-  <path d="M0 275 Q200 220 420 268 Q640 230 1000 270 V320 H0Z" fill="#a5dc7c"/>
+  <rect width="1000" height="600" fill="url(#${u}s)"/>
+  ${sunOrMoon(T, 860, 90)}
+  ${cloud(180, 80, 1, 'drift1', T.cloud)}${cloud(560, 60, 0.8, 'drift2', T.cloud)}${cloud(380, 140, 0.6, 'drift1', T.cloud)}
+  <path d="M0 250 Q150 170 320 230 Q480 160 650 225 Q820 170 1000 230 V320 H0Z" fill="${T.hills[0]}"/>
+  <path d="M0 275 Q200 220 420 268 Q640 230 1000 270 V320 H0Z" fill="${T.hills[1]}"/>
   <g transform="translate(770 150)">
     <path d="M0 50 L60 0 L120 50 V140 H0Z" fill="#e5484d" stroke="${OUT}" stroke-width="4" stroke-linejoin="round"/>
     <path d="M-10 56 L60 -6 L130 56" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    ${T.snow ? snowCap('M-14 58 L60 -12 L134 58 L124 64 Q96 44 60 8 Q24 44 -4 64Z') : ''}
     <rect x="35" y="72" width="50" height="68" fill="#fff" stroke="${OUT}" stroke-width="4"/>
     <path d="M35 72 L85 140 M85 72 L35 140" stroke="#e5484d" stroke-width="5"/>
-    <circle cx="60" cy="38" r="10" fill="#fff" stroke="${OUT}" stroke-width="3"/>
+    <circle cx="60" cy="38" r="10" fill="${T.dim ? '#ffe066' : '#fff'}" stroke="${OUT}" stroke-width="3"/>
   </g>
   <g transform="translate(110 70)">
     <rect x="-14" y="120" width="28" height="110" rx="6" fill="#9b6b43" stroke="${OUT}" stroke-width="4"/>
-    <circle cx="0" cy="80" r="70" fill="#5fb548" stroke="${OUT}" stroke-width="4"/>
-    <circle cx="-40" cy="110" r="45" fill="#5fb548" stroke="${OUT}" stroke-width="4"/>
-    <circle cx="42" cy="112" r="45" fill="#5fb548" stroke="${OUT}" stroke-width="4"/>
-    <path d="M-35 120 a45 45 0 0 0 78 4 a70 70 0 0 0 -3 -50 a70 70 0 0 0 -72 0 Z" fill="#5fb548"/>
-    <circle cx="-20" cy="60" r="7" fill="#ff6b6b"/><circle cx="30" cy="90" r="7" fill="#ff6b6b"/><circle cx="-45" cy="115" r="7" fill="#ff6b6b"/><circle cx="20" cy="40" r="7" fill="#ff6b6b"/>
+    <circle cx="0" cy="80" r="70" fill="${T.leaf}" stroke="${OUT}" stroke-width="4"/>
+    <circle cx="-40" cy="110" r="45" fill="${T.leaf2}" stroke="${OUT}" stroke-width="4"/>
+    <circle cx="42" cy="112" r="45" fill="${T.leaf2}" stroke="${OUT}" stroke-width="4"/>
+    <path d="M-35 120 a45 45 0 0 0 78 4 a70 70 0 0 0 -3 -50 a70 70 0 0 0 -72 0 Z" fill="${T.leaf}"/>
+    ${fruit}
   </g>
   ${fence}
-  <path d="M0 268 H1000 M0 288 H1000" stroke="#e8dcc8" stroke-width="6"/>
-  <rect y="300" width="1000" height="300" fill="url(#gGrass)"/>
-  <path d="M500 600 Q470 470 560 400 Q640 340 600 300" fill="none" stroke="#e9d3a8" stroke-width="60" stroke-linecap="round" opacity=".7"/>
+  <path d="M0 268 H1000 M0 288 H1000" stroke="${T.rail}" stroke-width="6"/>
+  <rect y="300" width="1000" height="300" fill="url(#${u}g)"/>
+  <path d="M500 600 Q470 470 560 400 Q640 340 600 300" fill="none" stroke="${T.path}" stroke-width="60" stroke-linecap="round" opacity=".7"/>
   <g transform="translate(290 225)">
     <path d="M0 40 L50 0 L100 40 V95 H0Z" fill="#74c0fc" stroke="${OUT}" stroke-width="4" stroke-linejoin="round"/>
     <path d="M-12 46 L50 -6 L112 46" fill="none" stroke="#1c7ed6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    ${T.snow ? snowCap('M-16 44 L50 -12 L116 44 L106 50 Q80 30 50 6 Q20 30 -6 50Z') : ''}
     <path d="M30 95 V65 Q50 45 70 65 V95Z" fill="#3b3540"/>
   </g>
-  ${tufts}${flowers}
+  ${ground}
   </svg>`;
+}
+
+// Väder och ljus som ligger ovanpå bakgrunden (snö, löv, stjärnor, eldflugor)
+function weatherHtml(themeId) {
+  const T = THEMES[themeId] || THEMES.sommar;
+  const r = (a, b) => (a + Math.random() * (b - a)).toFixed(1);
+  let h = '';
+  if (T.snow) {
+    for (let i = 0; i < 45; i++) {
+      const s = r(4, 10);
+      h += `<i class="flake" style="left:${r(-5, 100)}%;width:${s}px;height:${s}px;animation-duration:${r(7, 15)}s;animation-delay:-${r(0, 15)}s"></i>`;
+    }
+  }
+  if (T.fallenLeaves) {
+    const cols = ['#e8893a', '#d9534f', '#f2b134'];
+    for (let i = 0; i < 12; i++) {
+      h += `<i class="leaf-fx" style="left:${r(-5, 95)}%;background:${cols[i % 3]};animation-duration:${r(9, 16)}s;animation-delay:-${r(0, 16)}s"></i>`;
+    }
+  }
+  if (T.moon) {
+    for (let i = 0; i < 40; i++) {
+      h += `<i class="star-fx" style="left:${r(0, 100)}%;top:${r(1, 38)}%;animation-delay:-${r(0, 3)}s"></i>`;
+    }
+    for (let i = 0; i < 9; i++) {
+      h += `<i class="firefly" style="left:${r(5, 95)}%;top:${r(55, 92)}%;animation-duration:${r(3, 6)}s,${r(1.5, 3)}s;animation-delay:-${r(0, 6)}s"></i>`;
+    }
+  }
+  return h;
 }
 
 // ---------- Behandlingsrummet ----------
 
-function clinicBg() {
+function clinicBg(themeId = 'sommar') {
+  const T = THEMES[themeId] || THEMES.sommar;
+  const u = 'bg' + (++_bgId);
   let tiles = '';
   for (let x = 0; x <= 1000; x += 50) tiles += `<path d="M${x} 300 V470" stroke="#b3e2d6" stroke-width="2"/>`;
   for (let y = 300; y <= 470; y += 42) tiles += `<path d="M0 ${y} H1000" stroke="#b3e2d6" stroke-width="2"/>`;
@@ -80,15 +197,20 @@ function clinicBg() {
   for (let y = 490; y < 600; y += 30) planks += `<path d="M0 ${y} H1000" stroke="#d9b98f" stroke-width="2"/>`;
   const bottles = [['#ff8787', 20], ['#74c0fc', 60], ['#8ce99a', 100], ['#ffd43b', 140]].map(([c, x]) =>
     `<rect x="${x}" y="-46" width="26" height="40" rx="6" fill="${c}" stroke="${OUT}" stroke-width="3"/><rect x="${x + 7}" y="-56" width="12" height="10" fill="#fff" stroke="${OUT}" stroke-width="3"/>`).join('');
+  const windowSky = T.moon
+    ? `<circle cx="150" cy="45" r="20" fill="#fff3c4"/><circle cx="40" cy="30" r="2" fill="#fff"/><circle cx="80" cy="55" r="1.6" fill="#fff"/><circle cx="120" cy="20" r="1.8" fill="#fff"/>`
+    : T.sunset ? `<circle cx="150" cy="110" r="24" fill="${T.sun}"/>` : `<circle cx="150" cy="45" r="22" fill="${T.sun}"/>`;
   return `<svg class="bg-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMax slice">
+  <defs><linearGradient id="${u}w" x1="0" y1="0" x2="0" y2="1">${skyStops(T.sky)}</linearGradient></defs>
   <rect width="1000" height="600" fill="#e6f7f2"/>
   <rect y="300" width="1000" height="170" fill="#ccefe5"/>${tiles}
   <rect y="466" width="1000" height="10" fill="#9fd8c8"/>
   <rect y="476" width="1000" height="124" fill="#f2dcc0"/>${planks}
   <g transform="translate(70 80)">
-    <rect width="200" height="160" rx="10" fill="#bfe7ff" stroke="${OUT}" stroke-width="5"/>
-    <circle cx="150" cy="45" r="22" fill="#ffe066"/>
-    <path d="M10 130 Q60 90 110 125 Q150 100 190 130 V150 H10Z" fill="#8fd16a"/>
+    <rect width="200" height="160" rx="10" fill="url(#${u}w)" stroke="${OUT}" stroke-width="5"/>
+    ${windowSky}
+    <path d="M10 130 Q60 90 110 125 Q150 100 190 130 V150 H10Z" fill="${T.grass[0]}"/>
+    ${T.snow ? '<circle cx="40" cy="40" r="3" fill="#fff"/><circle cx="90" cy="70" r="3" fill="#fff"/><circle cx="170" cy="90" r="3" fill="#fff"/><circle cx="60" cy="100" r="3" fill="#fff"/>' : ''}
     <path d="M100 0 V160 M0 80 H200" stroke="#fff" stroke-width="8"/>
     <rect width="200" height="160" rx="10" fill="none" stroke="${OUT}" stroke-width="5"/>
     <path d="M-20 -10 Q20 80 -10 175 L-30 175 V-10Z" fill="#ff8fab" stroke="${OUT}" stroke-width="4"/>
@@ -114,6 +236,11 @@ function clinicBg() {
     <ellipse cx="12" cy="-88" rx="12" ry="22" fill="#5fb548"/><ellipse cx="34" cy="-62" rx="12" ry="22" fill="#5fb548" transform="rotate(25 34 -62)"/>
   </g>
   </svg>`;
+}
+
+// Liten förhandsbild av en miljö (för miljöväljaren)
+function themePreview(themeId) {
+  return `<div class="theme-prev">${gardenBg(themeId)}<div class="weather">${weatherHtml(themeId)}</div></div>`;
 }
 
 const tableSvg = `<svg class="table-svg" viewBox="0 0 300 80" preserveAspectRatio="none">
@@ -159,6 +286,17 @@ const TOOL_ICONS = {
   forstoringsglas: `${strokeOut('M37 37 L54 54', '#c97b3c', 7)}<circle cx="26" cy="26" r="17" fill="#d0ebff" stroke="${OUT}" stroke-width="4"/><circle cx="26" cy="26" r="17" fill="none" stroke="#adb5bd" stroke-width="2"/><path d="M16 22 Q18 15 25 13" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`,
   hovkratsa: `${strokeOut('M14 52 L34 32', '#e5484d', 9)}${strokeOut('M34 32 L44 22 Q52 12 44 8', '#c3ccd6', 4)}`,
 };
+
+TOOL_ICONS.stetoskop = `${strokeOut('M18 8 V24 Q18 38 30 38 Q42 38 42 24 V8', '#adb5bd', 3)}${strokeOut('M30 38 Q30 54 42 52', '#4dabf7', 4)}
+  <circle cx="18" cy="8" r="3.5" fill="${OUT}"/><circle cx="42" cy="8" r="3.5" fill="${OUT}"/><circle cx="48" cy="50" r="9" fill="#cfd8e3" ${S3}/><circle cx="48" cy="50" r="4" fill="#fff" ${S3}/>`;
+TOOL_ICONS.nasspray = `<rect x="20" y="30" width="24" height="28" rx="6" fill="#a5d8ff" ${S3}/><path d="M26 30 V20 L32 6 L38 20 V30Z" fill="#fff" ${S3}/><rect x="24" y="38" width="16" height="10" rx="2" fill="#fff"/>
+  <circle cx="44" cy="6" r="2" fill="#74c0fc"/><circle cx="48" cy="12" r="1.6" fill="#74c0fc"/><circle cx="20" cy="8" r="1.8" fill="#74c0fc"/>`;
+TOOL_ICONS.tandborste = `<g transform="rotate(-35 32 32)"><rect x="4" y="29" width="44" height="8" rx="4" fill="#ff8fab" ${S3}/><rect x="44" y="20" width="16" height="10" rx="2" fill="#fff" ${S3}/>
+  <path d="M47 20 v-6 M51 20 v-6 M55 20 v-6" stroke="#74c0fc" stroke-width="3" stroke-linecap="round"/></g><path d="M44 46 q4 -4 8 0 v10 q-4 3 -8 0Z" fill="#fff" ${S3}/>`;
+TOOL_ICONS.orondroppar = `<path d="M22 30 h20 v24 q0 4 -4 4 h-12 q-4 0 -4 -4Z" fill="#ffc078" ${S3}/><path d="M27 30 L30 14 h4 L37 30Z" fill="#fff" ${S3}/><path d="M32 2 q-5 6 0 9 q5 -3 0 -9Z" fill="#f08c00" ${S3}/>
+  <path d="M28 50 Q26 38 33 37 Q39 37 38 44 Q37 48 33 49" fill="none" stroke="${OUT}" stroke-width="2.5" stroke-linecap="round"/>`;
+TOOL_ICONS.kylpase = `<rect x="8" y="14" width="48" height="36" rx="10" fill="#a5d8ff" ${S3}/><path d="M32 20 V44 M21 26 L43 38 M43 26 L21 38" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M28 20 l4 4 l4 -4 M28 44 l4 -4 l4 4" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`;
 
 const FOODS = {
   hundgodis: { name: 'Hundgodis', likes: ['hund'] },
@@ -212,6 +350,7 @@ const UI_ICONS = {
   paw: `<g transform="translate(32 38)" fill="currentColor"><ellipse rx="13" ry="11"/><circle cx="-16" cy="-15" r="6"/><circle cx="-6" cy="-24" r="6"/><circle cx="6" cy="-24" r="6"/><circle cx="16" cy="-15" r="6"/></g>`,
   door: `<rect x="14" y="6" width="36" height="52" rx="4" fill="#ffd8a8" ${S3}/><circle cx="42" cy="34" r="3" fill="${OUT}"/><path d="M24 18 h16 v4 h-16Z" fill="#e5484d"/>`,
   home: `<path d="M8 30 L32 10 L56 30 V54 H8Z" fill="#ffd8a8" ${S3}/><rect x="26" y="36" width="12" height="18" fill="#c97b3c" ${S3}/>`,
+  scene: `<circle cx="24" cy="24" r="13" fill="#ffd43b" ${S3}/><path d="M50 38 A16 16 0 1 1 34 20 A12 12 0 0 0 50 38Z" fill="#4c6ef5" ${S3}/><circle cx="16" cy="50" r="2.5" fill="#74c0fc"/><circle cx="26" cy="56" r="2" fill="#74c0fc"/>`,
 };
 
 const toolIcon = id => icon(TOOL_ICONS[id] || '');

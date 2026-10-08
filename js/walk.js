@@ -6,35 +6,42 @@ const WALK_TIME = 40;  // sekunder
 
 const svgUrl = svg => `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 
-const WALK_ART = {
-  hills: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" preserveAspectRatio="none">
-    <path d="M0 300 V170 Q120 80 260 150 Q380 60 520 140 Q660 70 800 170 V300Z" fill="#b8e68f"/>
-    <path d="M0 300 V220 Q160 160 330 215 Q520 150 800 220 V300Z" fill="#a5dc7c"/></svg>`,
-  trees: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300">
-    <g stroke="${OUT}" stroke-width="5">
-      <rect x="112" y="170" width="26" height="130" rx="6" fill="#9b6b43"/>
-      <circle cx="125" cy="130" r="70" fill="#5fb548"/>
-      <rect x="560" y="200" width="20" height="100" rx="5" fill="#9b6b43"/>
-      <path d="M570 70 L630 210 H510Z" fill="#3f9a4a" stroke-linejoin="round"/>
-      <path d="M570 120 L640 250 H500Z" fill="#3f9a4a" stroke-linejoin="round"/>
-      <ellipse cx="340" cy="285" rx="70" ry="40" fill="#6cc04a"/>
-      <ellipse cx="790" cy="290" rx="55" ry="30" fill="#6cc04a"/>
-    </g>
-    <circle cx="100" cy="110" r="9" fill="#ff6b6b"/><circle cx="150" cy="140" r="9" fill="#ff6b6b"/><circle cx="110" cy="160" r="9" fill="#ff6b6b"/>
-    <circle cx="320" cy="270" r="6" fill="#ff8fab"/><circle cx="360" cy="262" r="6" fill="#ffd43b"/><circle cx="780" cy="280" r="6" fill="#fff"/></svg>`,
-  ground: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" preserveAspectRatio="none">
-    <rect width="400" height="120" fill="#e3c08d"/>
-    <rect width="400" height="16" fill="#7ccf5a"/>
-    <path d="M0 16 Q20 26 40 16 T80 16 T120 16 T160 16 T200 16 T240 16 T280 16 T320 16 T360 16 T400 16" fill="#7ccf5a"/>
-    <path d="M0 16 H400" stroke="${OUT}" stroke-width="4"/>
-    <ellipse cx="60" cy="60" rx="10" ry="5" fill="#c9a46f"/><ellipse cx="210" cy="85" rx="14" ry="6" fill="#c9a46f"/>
-    <ellipse cx="320" cy="50" rx="8" ry="4" fill="#c9a46f"/><ellipse cx="130" cy="100" rx="9" ry="4" fill="#c9a46f"/></svg>`,
-  rideGround: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" preserveAspectRatio="none">
-    <rect width="400" height="120" fill="#d8b48a"/>
-    <rect width="400" height="10" fill="#fff"/><rect y="10" width="400" height="6" fill="#e5484d"/>
-    <path d="M0 16 H400" stroke="${OUT}" stroke-width="4"/>
-    <path d="M30 50 q10 -6 20 0 M180 80 q10 -6 20 0 M300 45 q10 -6 20 0 M110 100 q10 -6 20 0" stroke="#b8946a" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
-};
+// Landskapet för promenaden, i rätt miljö (sommar, höst, vinter, natt, solnedgång)
+function walkArt(themeId) {
+  const T = THEMES[themeId] || THEMES.sommar;
+  const snowTop = T.snow ? `<path d="M570 70 L600 140 Q585 132 570 140 Q555 132 540 140Z" fill="#fff"/><path d="M570 120 L604 184 Q588 176 570 184 Q552 176 536 184Z" fill="#fff"/>` : '';
+  const fruit = T.fruit ? `<circle cx="100" cy="110" r="9" fill="${T.fruit}"/><circle cx="150" cy="140" r="9" fill="${T.fruit}"/><circle cx="110" cy="160" r="9" fill="${T.fruit}"/>` : '';
+  const flowers = T.flowers ? `<circle cx="320" cy="270" r="6" fill="#ff8fab"/><circle cx="360" cy="262" r="6" fill="#ffd43b"/><circle cx="780" cy="280" r="6" fill="#fff"/>` : '';
+  const stones = T.snow ? '#d3dde8' : '#c9a46f';
+  return {
+    sky: `linear-gradient(${T.sky.join(', ')})`,
+    hills: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" preserveAspectRatio="none">
+      <path d="M0 300 V170 Q120 80 260 150 Q380 60 520 140 Q660 70 800 170 V300Z" fill="${T.hills[0]}"/>
+      <path d="M0 300 V220 Q160 160 330 215 Q520 150 800 220 V300Z" fill="${T.hills[1]}"/></svg>`,
+    trees: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300">
+      <g stroke="${OUT}" stroke-width="5">
+        <rect x="112" y="170" width="26" height="130" rx="6" fill="#9b6b43"/>
+        <circle cx="125" cy="130" r="70" fill="${T.leaf}"/>
+        <rect x="560" y="200" width="20" height="100" rx="5" fill="#9b6b43"/>
+        <path d="M570 70 L630 210 H510Z" fill="${T.pine}" stroke-linejoin="round"/>
+        <path d="M570 120 L640 250 H500Z" fill="${T.pine}" stroke-linejoin="round"/>
+        <ellipse cx="340" cy="285" rx="70" ry="40" fill="${T.bush}"/>
+        <ellipse cx="790" cy="290" rx="55" ry="30" fill="${T.bush}"/>
+      </g>${snowTop}${fruit}${flowers}</svg>`,
+    ground: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" preserveAspectRatio="none">
+      <rect width="400" height="120" fill="${T.ground}"/>
+      <rect width="400" height="16" fill="${T.groundTop}"/>
+      <path d="M0 16 Q20 26 40 16 T80 16 T120 16 T160 16 T200 16 T240 16 T280 16 T320 16 T360 16 T400 16" fill="${T.groundTop}"/>
+      <path d="M0 16 H400" stroke="${OUT}" stroke-width="4"/>
+      <ellipse cx="60" cy="60" rx="10" ry="5" fill="${stones}"/><ellipse cx="210" cy="85" rx="14" ry="6" fill="${stones}"/>
+      <ellipse cx="320" cy="50" rx="8" ry="4" fill="${stones}"/><ellipse cx="130" cy="100" rx="9" ry="4" fill="${stones}"/></svg>`,
+    rideGround: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" preserveAspectRatio="none">
+      <rect width="400" height="120" fill="${T.snow ? '#e9eff5' : '#d8b48a'}"/>
+      <rect width="400" height="10" fill="#fff"/><rect y="10" width="400" height="6" fill="#e5484d"/>
+      <path d="M0 16 H400" stroke="${OUT}" stroke-width="4"/>
+      <path d="M30 50 q10 -6 20 0 M180 80 q10 -6 20 0 M300 45 q10 -6 20 0 M110 100 q10 -6 20 0" stroke="${T.snow ? '#c9d6e3' : '#b8946a'}" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
+  };
+}
 
 const OBSTACLES = {
   puddle: { w: 0.9, h: 0.1, flat: true, svg: `<svg viewBox="0 0 100 24" preserveAspectRatio="none"><ellipse cx="50" cy="12" rx="48" ry="10" fill="#74c0fc" ${SK}/><ellipse cx="38" cy="10" rx="18" ry="3" fill="#fff" opacity=".6"/></svg>` },
@@ -63,8 +70,15 @@ const Walk = {
     window.addEventListener('keydown', e => {
       if (currentScreen === 'walk' && [' ', 'ArrowUp', 'w'].includes(e.key)) { e.preventDefault(); this.jump(); }
     });
-    $('#walk-hills').style.backgroundImage = svgUrl(WALK_ART.hills);
-    $('#walk-trees').style.backgroundImage = svgUrl(WALK_ART.trees);
+  },
+
+  applyTheme(themeId) {
+    this.art = walkArt(themeId);
+    $('#walk-field').style.background = this.art.sky;
+    $('#walk-hills').style.backgroundImage = svgUrl(this.art.hills);
+    $('#walk-trees').style.backgroundImage = svgUrl(this.art.trees);
+    $('#walk-weather').innerHTML = weatherHtml(themeId);
+    if (this.a) $('#walk-ground').style.backgroundImage = svgUrl(this.ride ? this.art.rideGround : this.art.ground);
   },
 
   enter(id) {
@@ -72,7 +86,7 @@ const Walk = {
     if (!this.a || this.a.injury) { setTimeout(() => show('home'), 0); return; }
     this.ride = this.a.species === 'hast';
     $('#walk-title').textContent = this.ride ? `Ridtur med ${this.a.name}` : `Promenad med ${this.a.name}`;
-    $('#walk-ground').style.backgroundImage = svgUrl(this.ride ? WALK_ART.rideGround : WALK_ART.ground);
+    $('#walk-ground').style.backgroundImage = svgUrl(this.ride ? this.art.rideGround : this.art.ground);
     $('#walk-objs').innerHTML = '';
     this.objs = [];
     this.dist = 0;

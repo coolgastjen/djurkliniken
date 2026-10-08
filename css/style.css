@@ -414,3 +414,31 @@ input { font: inherit; }
 .walk-obj.knocked .poles { transform: rotate(14deg) translate(4px, 14px); transform-origin: 30px 40px; }
 .walk-obj.knocked { filter: saturate(.7); }
 .walk-obj.splashed svg ellipse:first-child { fill: #4dabf7; }
+
+/* ---------- Miljöer: väder och ljus ---------- */
+.weather { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 150; }
+#play-weather, #walk-weather { z-index: 3; }
+.flake { position: absolute; top: -12px; border-radius: 50%; background: #fff; opacity: .9; box-shadow: 0 0 3px rgba(120, 150, 190, .6); animation: snowfall linear infinite; }
+@keyframes snowfall { to { transform: translate(50px, 110vh); } }
+.leaf-fx { position: absolute; top: -14px; width: 16px; height: 10px; border-radius: 0 100% 0 100%; animation: leaffall linear infinite; }
+@keyframes leaffall { 0% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(60px, 55vh) rotate(300deg); } 100% { transform: translate(-20px, 110vh) rotate(620deg); } }
+.star-fx { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fff; animation: twinkle 2.4s ease-in-out infinite; }
+@keyframes twinkle { 50% { opacity: .25; } }
+.firefly { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #fff57a; box-shadow: 0 0 10px 4px rgba(255, 240, 120, .6); animation: flyabout ease-in-out infinite alternate, glowblink ease-in-out infinite; }
+@keyframes flyabout { to { transform: translate(40px, -30px); } }
+@keyframes glowblink { 50% { opacity: .2; } }
+body[data-scene="natt"] #garden-animals, body[data-scene="natt"] .play-pet, body[data-scene="natt"] .walk-pet { filter: brightness(.86) saturate(.9); }
+@media (prefers-reduced-motion: reduce) {
+  .flake, .leaf-fx, .firefly { display: none; }
+  .star-fx { animation: none; }
+}
+
+/* Miljöväljaren */
+.picker-head { margin: 0 0 12px; text-align: center; }
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.theme-card { background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 6px; display: flex; flex-direction: column; gap: 6px; font-weight: 600; text-align: center; box-shadow: var(--shadow); }
+.theme-card.selected { background: #fff0c2; outline: 4px solid var(--coral); }
+.theme-card small { display: block; font-weight: 400; font-size: .75rem; color: var(--ink-soft); }
+.theme-prev { position: relative; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; }
+.theme-prev .weather { z-index: 1; }
+.theme-prev .flake { width: 4px !important; height: 4px !important; }

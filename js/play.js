@@ -25,7 +25,6 @@ const Play = {
     $('#play-back').addEventListener('click', () => { Sound.click(); this.quit(); });
     $('#play-ball').innerHTML = uiIcon('ball');
     $('#play-goal').innerHTML = uiIcon('star');
-    $('#play-bg').innerHTML = gardenBg().replace(/gSky/g, 'pSky').replace(/gGrass/g, 'pGrass');
   },
 
   enter(id) {
