@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Djurkliniken – testsida för grafik</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  html, body { overflow: auto; height: auto; }
+  body { padding: 16px; }
+  h2 { margin: 18px 0 6px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cell { width: 150px; text-align: center; font-size: .75rem; background: #fff; border: 2px solid #ddd; border-radius: 10px; }
+  .cell .animal { width: 100%; aspect-ratio: 1; }
+  .icons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .icons div { width: 80px; text-align: center; font-size: .7rem; background: #fff; border-radius: 8px; padding: 4px; }
+  .icons .ico { width: 56px; height: 56px; margin: 0 auto; }
+  .bg { width: 600px; height: 360px; border: 2px solid #333; display: inline-block; margin-right: 10px; }
+</style>
+</head>
+<body>
+<h1>Testsida för grafiken</h1>
+<div id="out"></div>
+<script src="js/sound.js"></script>
+<script src="js/state.js"></script>
+<script src="js/animals.js"></script>
+<script src="js/injuries.js"></script>
+<script src="js/art.js"></script>
+<script>
+  const out = document.getElementById('out');
+  let html = '';
+  const cell = (a, opts, label) => `<div class="cell">${drawAnimal(a, opts)}<div>${label}</div></div>`;
+  let id = 1;
+
+  html += '<h2>Alla djur och färger</h2><div class="row">';
+  for (const sp of SPECIES_ORDER) SPECIES[sp].colors.forEach((c, i) => {
+    html += cell({ id: id++, species: sp, color: i }, {}, SPECIES[sp].name + ' – ' + c.name);
+  });
+  html += '</div>';
+
+  html += '<h2>Humör</h2><div class="row">';
+  for (const sp of SPECIES_ORDER) for (const m of ['happy', 'neutral', 'sad', 'sick', 'joy']) {
+    html += cell({ id: id++, species: sp, color: 0 }, { mood: m }, sp + ' ' + m);
+  }
+  html += '</div>';
+
+  html += '<h2>Skador (alla steg)</h2><div class="row">';
+  for (const sp of SPECIES_ORDER) for (const type of injuriesFor(sp)) {
+    const def = INJURIES[type];
+    for (let step = 0; step < def.steps.length; step++) {
+      const a = { id: id++, species: sp, color: 1, injury: { type, spot: def.spots.find(s => SPECIES[sp].spots[s]), step } };
+      html += cell(a, { mood: moodFor(Object.assign({ needs: { food: 80, water: 80, joy: 80, clean: 80 } }, a)) }, `${sp} ${type} steg ${step}`);
+    }
+  }
+  html += '</div>';
+
+  html += '<h2>Plåster, bandage och tillbehör</h2><div class="row">';
+  const accs = Object.keys(ACCESSORIES);
+  SPECIES_ORDER.forEach((sp, i) => {
+    html += cell({ id: id++, species: sp, color: 2, mark: { kind: 'plaster', spot: 'head' } }, {}, sp + ' plåster');
+    html += cell({ id: id++, species: sp, color: 2, mark: { kind: sp === 'fagel' ? 'wing' : 'bandage', spot: sp === 'fagel' ? 'wing' : 'legL' } }, {}, sp + ' bandage');
+    html += cell({ id: id++, species: sp, color: 0, acc: { head: accs[i % 5], neck: i % 2 ? 'halsband' : 'scarf', face: i % 3 === 0 ? 'glasogon' : null } }, {}, sp + ' tillbehör');
+  });
+  html += '</div>';
+
+  html += '<h2>Verktyg</h2><div class="icons">' + Object.keys(TOOLS).map(t => `<div>${toolIcon(t)}${TOOLS[t]}</div>`).join('') + '</div>';
+  html += '<h2>Mat</h2><div class="icons">' + Object.keys(FOODS).map(t => `<div>${foodIcon(t)}${FOODS[t].name}</div>`).join('') + '</div>';
+  html += '<h2>Knappar</h2><div class="icons">' + Object.keys(UI_ICONS).map(t => `<div style="color:#4b3a33">${uiIcon(t)}${t}</div>`).join('') + `<div>${logoSvg}logga</div><div>${vetSvg}veterinär</div></div>`;
+  html += '<h2>Tillbehör</h2><div class="icons">' + accs.map(t => `<div>${accessoryIcon(t)}${ACCESSORIES[t].name}</div>`).join('') + '</div>';
+  html += `<h2>Bakgrunder</h2><div class="bg">${gardenBg()}</div><div class="bg">${clinicBg()}</div><div style="width:300px">${tableSvg}</div>`;
+  out.innerHTML = html;
+</script>
+</body>
+</html>
